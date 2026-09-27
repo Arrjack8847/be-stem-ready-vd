@@ -37,7 +37,7 @@ export const HOOK_TRIMS = {
 } as const;
 
 export const HOOK_SFX = {
-  impact: 'hook-sfx/impact.wav',
-  scaleWhoosh: 'hook-sfx/scale-whoosh.wav',
-  achievementHit: 'hook-sfx/achievement-hit.wav',
+  impact: 'hook/sfx/impact.wav',
+  scaleWhoosh: 'hook/sfx/scale-whoosh.wav',
+  achievementHit: 'hook/sfx/achievement-hit.wav',
 } as const;
