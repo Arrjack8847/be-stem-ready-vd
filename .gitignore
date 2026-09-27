@@ -3,5 +3,6 @@ out/
 build/
 .DS_Store
 public/bsr-assets/A001_09130952_C231(1).mov
+public/hook/
 
 *.mov
