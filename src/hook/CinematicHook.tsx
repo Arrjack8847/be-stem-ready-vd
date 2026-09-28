@@ -16,7 +16,6 @@ import {
   HOOK_CUTS,
   HOOK_DURATION,
   HOOK_SOURCES,
-  HOOK_TRIMS,
 } from './hookConfig';
 
 export {HOOK_DURATION} from './hookConfig';
@@ -78,23 +77,21 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
     <Fonts />
 
     <Sequence
-      name="01 · Robot impact"
+      name="01 · Technology impact"
       from={HOOK_CUTS.techStart}
       durationInFrames={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.handsStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.robot}
-        type="video"
+        src={HOOK_SOURCES.tech}
+        type="image"
         duration={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.handsStart)}
-        trimBefore={HOOK_TRIMS.tech}
-        ramp={{atFrame: 26, rateA: 1.18, rateB: 0.88}}
-        scaleFrom={1.035}
-        scaleTo={1.065}
-        translateXFrom={-5}
-        translateXTo={5}
-        objectPosition="54% 56%"
-        filter="contrast(1.14) saturate(1.05) brightness(.90)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.23), rgba(3,10,22,.015) 56%, rgba(3,10,22,.07))"
+        scaleFrom={1.04}
+        scaleTo={1.09}
+        translateXFrom={-10}
+        translateXTo={4}
+        objectPosition="50% 48%"
+        filter="contrast(1.13) saturate(1.04) brightness(.91)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.22), rgba(3,10,22,.015) 58%, rgba(3,10,22,.07))"
       />
     </Sequence>
 
@@ -123,15 +120,14 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       durationInFrames={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.activity}
-        type="video"
+        src={HOOK_SOURCES.human}
+        type="image"
         duration={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
-        trimBefore={HOOK_TRIMS.human}
-        playbackRate={0.86}
-        scaleFrom={1.075}
-        scaleTo={1.095}
-        translateXFrom={82}
-        translateXTo={58}
+        scaleFrom={1.06}
+        scaleTo={1.085}
+        translateXFrom={18}
+        translateXTo={4}
+        objectPosition="48% 43%"
         filter="contrast(1.07) saturate(.99) brightness(.94)"
         overlay="linear-gradient(90deg, rgba(3,10,22,.03), transparent 50%, rgba(3,10,22,.09)), linear-gradient(0deg, rgba(3,10,22,.16), transparent 58%)"
       />
@@ -143,15 +139,14 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       durationInFrames={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.activity}
-        type="video"
+        src={HOOK_SOURCES.competition}
+        type="image"
         duration={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
-        trimBefore={HOOK_TRIMS.competition}
-        playbackRate={1.02}
-        scaleFrom={1.005}
-        scaleTo={1.03}
-        translateXFrom={0}
-        translateXTo={-6}
+        scaleFrom={1.01}
+        scaleTo={1.045}
+        translateXFrom={8}
+        translateXTo={-8}
+        objectPosition="50% 48%"
         filter="contrast(1.10) saturate(1.02) brightness(.95)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.14), transparent 62%, rgba(3,10,22,.045))"
       />
@@ -164,12 +159,12 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
     >
       <HookShot
         src={HOOK_SOURCES.achievement}
-        type="video"
+        type="image"
         duration={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.venueStart)}
-        trimBefore={HOOK_TRIMS.achievement}
-        ramp={{atFrame: 30, rateA: 1.0, rateB: 0.80}}
-        scaleFrom={1.015}
-        scaleTo={1.05}
+        scaleFrom={1.02}
+        scaleTo={1.06}
+        translateYFrom={4}
+        translateYTo={-5}
         objectPosition="51% 48%"
         filter="contrast(1.09) saturate(1.04) brightness(.94)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.16), transparent 64%, rgba(3,10,22,.035))"
@@ -177,19 +172,20 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
     </Sequence>
 
     <Sequence
-      name="06 · Venue scale reveal"
+      name="06 · Scale reveal"
       from={HOOK_CUTS.venueStart}
       durationInFrames={durationBetween(HOOK_CUTS.venueStart, HOOK_CUTS.heroTechStart)}
     >
       <HookShot
         src={HOOK_SOURCES.venue}
-        type="video"
+        type="image"
         duration={durationBetween(HOOK_CUTS.venueStart, HOOK_CUTS.heroTechStart)}
-        trimBefore={HOOK_TRIMS.venue}
-        playbackRate={0.92}
         scaleFrom={1.0}
-        scaleTo={1.022}
-        filter="contrast(1.12) saturate(1.025) brightness(.92)"
+        scaleTo={1.03}
+        translateXFrom={-5}
+        translateXTo={5}
+        objectPosition="50% 50%"
+        filter="contrast(1.11) saturate(1.025) brightness(.92)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.15), transparent 62%, rgba(3,10,22,.05))"
       />
     </Sequence>
@@ -200,16 +196,14 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       durationInFrames={durationBetween(HOOK_CUTS.heroTechStart, HOOK_CUTS.brandStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.robot}
-        type="video"
+        src={HOOK_SOURCES.heroTech}
+        type="image"
         duration={durationBetween(HOOK_CUTS.heroTechStart, HOOK_CUTS.brandStart)}
-        trimBefore={HOOK_TRIMS.heroTech}
-        ramp={{atFrame: 36, rateA: 1.10, rateB: 0.90}}
         scaleFrom={1.045}
-        scaleTo={1.085}
+        scaleTo={1.095}
         translateXFrom={5}
         translateXTo={-5}
-        objectPosition="54% 57%"
+        objectPosition="50% 48%"
         filter="contrast(1.16) saturate(1.055) brightness(.89)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.22), rgba(3,10,22,.015) 58%, rgba(3,10,22,.07))"
       />
