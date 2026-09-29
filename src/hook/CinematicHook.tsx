@@ -4,8 +4,18 @@ import {AbsoluteFill, Sequence, staticFile} from 'remotion';
 import {ASSETS} from '../assets';
 import {Fonts} from '../Fonts';
 import {BrandReveal} from './BrandReveal';
+import {
+  AchievementOverlay,
+  BuildOverlay,
+  CompetitionOverlay,
+  FutureOverlay,
+  HumanOverlay,
+  ScaleOverlay,
+  TechOverlay,
+} from './HookGraphics';
 import {HookShot} from './HookShot';
 import {HookSoundDesign, hookMusicVolume} from './HookSoundDesign';
+import {HookTransitions} from './HookTransitions';
 import {
   HOOK_CUTS,
   HOOK_DURATION,
@@ -45,7 +55,12 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         objectPosition="52% 54%"
         filter="contrast(1.13) saturate(.99) brightness(.95)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 72%)"
+        exitMotionFrames={4}
+        exitTranslateX={11}
+        exitBlurPx={1.6}
+        exitScaleBoost={0.006}
       />
+      <TechOverlay duration={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.buildStart)} />
     </Sequence>
 
     <Sequence
@@ -65,7 +80,12 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         objectPosition="50% 50%"
         filter="contrast(1.06) saturate(1.00) brightness(.99)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.055), transparent 76%)"
+        entryMotionFrames={4}
+        entryTranslateX={-10}
+        entryBlurPx={1.25}
+        entryScaleOffset={0.005}
       />
+      <BuildOverlay duration={durationBetween(HOOK_CUTS.buildStart, HOOK_CUTS.humanStart)} />
     </Sequence>
 
     <Sequence
@@ -86,6 +106,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         filter="contrast(1.03) saturate(.99) brightness(1.01)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.04), transparent 78%)"
       />
+      <HumanOverlay duration={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)} />
     </Sequence>
 
     <Sequence
@@ -105,6 +126,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         filter="contrast(1.06) saturate(1.015) brightness(1.01)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.035), transparent 82%)"
       />
+      <CompetitionOverlay duration={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)} />
     </Sequence>
 
     <Sequence
@@ -123,7 +145,12 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         translateYTo={-1}
         filter="contrast(1.055) saturate(1.025) brightness(1.01) sepia(.018)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.045), transparent 80%)"
+        exitMotionFrames={6}
+        exitTranslateX={9}
+        exitBlurPx={1.9}
+        exitScaleBoost={0.008}
       />
+      <AchievementOverlay duration={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.scaleStart)} />
     </Sequence>
 
     <Sequence
@@ -141,6 +168,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         filter="contrast(1.035) saturate(.99) brightness(1.01)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.02), transparent 88%)"
       />
+      <ScaleOverlay duration={durationBetween(HOOK_CUTS.scaleStart, HOOK_CUTS.heroStart)} />
     </Sequence>
 
     <Sequence
@@ -161,6 +189,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         filter="contrast(1.12) saturate(1.025) brightness(.96)"
         overlay="linear-gradient(0deg, rgba(3,10,22,.08), transparent 74%)"
       />
+      <FutureOverlay duration={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)} />
     </Sequence>
 
     <Sequence
@@ -190,6 +219,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       }}
     />
 
+    <HookTransitions />
     <HookSoundDesign />
 
     {withMusic ? (
