@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/who-is-bsr-stage2-qa.yml'
       - 'src/**'
-      - 'scripts/prepare-who-assets.mjs'
+      - 'scripts/**'
       - 'package.json'
       - 'package-lock.json'
 
@@ -29,30 +29,24 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Pull scoped LFS media
+      - name: Pull LFS media
         shell: bash
         run: |
           set -euo pipefail
-          git lfs pull --include="after 15 seconds/*.mp4,public/media/who/_proxy/*.mp4,public/media/hook/**/*.mp4"
+          git lfs pull
           git lfs checkout
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Prepare Who Is BSR media
-        run: npm run prepare:who
+      - name: Prepare 0:00–0:36 media
+        run: npm run prepare:media
 
       - name: TypeScript check
         run: npm run check
 
-      - name: Render normal section
+      - name: Render final Stage 2 section
         run: npx remotion render src/index.ts WhoIsBSR out/qa/who-is-bsr-stage2.mp4 --codec=h264 --crf=20 --concurrency=2
-
-      - name: Render picture-only section
-        run: npx remotion render src/index.ts WhoIsBSR-PictureOnly out/qa/who-is-bsr-picture-only.mp4 --codec=h264 --crf=27 --concurrency=2
-
-      - name: Render music-only section
-        run: npx remotion render src/index.ts WhoIsBSR-MusicOnly out/qa/who-is-bsr-music-only.mp4 --codec=h264 --crf=27 --concurrency=2
 
       - name: Render QA stills
         shell: bash
