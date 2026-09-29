@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/who-is-bsr-stage2-qa.yml'
+      - 'src/**'
+      - 'scripts/prepare-who-assets.mjs'
+      - 'package.json'
+      - 'package-lock.json'
 
 permissions:
   contents: read
