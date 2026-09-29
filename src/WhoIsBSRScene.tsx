@@ -66,19 +66,21 @@ export const WhoIsBSRScene: React.FC<WhoIsBSRProps> = ({
     </Sequence>
 
     <Sequence
-      name="00:20.70–00:27.40 · History / growth"
+      name="00:20.70–00:27.60 · History / 6f transition tail"
       from={WHO_SCENES.history.from}
-      durationInFrames={WHO_SCENES.history.duration}
+      durationInFrames={WHO_SCENES.history.duration + WHO_TRANSITION_FRAMES}
     >
-      <HistoryScene duration={WHO_SCENES.history.duration} />
+      <HistoryScene
+        duration={WHO_SCENES.history.duration + WHO_TRANSITION_FRAMES}
+      />
     </Sequence>
 
     <Sequence
-      name="00:27.20–00:30.50 · History becomes motion (6f overlap)"
-      from={WHO_SCENES.growth.from - WHO_TRANSITION_FRAMES}
-      durationInFrames={WHO_SCENES.growth.duration + WHO_TRANSITION_FRAMES}
+      name="00:27.40–00:30.50 · History becomes motion"
+      from={WHO_SCENES.growth.from}
+      durationInFrames={WHO_SCENES.growth.duration}
     >
-      <GrowthScene duration={WHO_SCENES.growth.duration + WHO_TRANSITION_FRAMES} />
+      <GrowthScene duration={WHO_SCENES.growth.duration} />
     </Sequence>
 
     <Sequence

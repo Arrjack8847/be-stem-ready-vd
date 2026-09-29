@@ -5,11 +5,24 @@ import {WHO_SOURCES, WHO_TRANSITION_FRAMES, WHO_TRIMS} from './whoConfig';
 
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 
+// 93 timeline frames (3.1s) are mapped to the approved 90 source frames (3.0s).
+const APPROVED_GROWTH_PLAYBACK_RATE = 30 / 31;
+
 export const GrowthScene: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
   const labelOpacity = Math.min(
-    interpolate(frame, [WHO_TRANSITION_FRAMES + 2, WHO_TRANSITION_FRAMES + 10], [0, 1], clamp),
-    interpolate(frame, [WHO_TRANSITION_FRAMES + 34, WHO_TRANSITION_FRAMES + 48], [1, 0], clamp),
+    interpolate(
+      frame,
+      [WHO_TRANSITION_FRAMES + 2, WHO_TRANSITION_FRAMES + 10],
+      [0, 1],
+      clamp,
+    ),
+    interpolate(
+      frame,
+      [WHO_TRANSITION_FRAMES + 34, WHO_TRANSITION_FRAMES + 48],
+      [1, 0],
+      clamp,
+    ),
   );
   const labelY = interpolate(
     frame,
@@ -24,6 +37,7 @@ export const GrowthScene: React.FC<{duration: number}> = ({duration}) => {
         src={WHO_SOURCES.growth}
         duration={duration}
         trimBefore={WHO_TRIMS.growth}
+        playbackRate={APPROVED_GROWTH_PLAYBACK_RATE}
         scaleFrom={1.008}
         scaleTo={1.024}
         xFrom={2}

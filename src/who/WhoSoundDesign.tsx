@@ -9,7 +9,11 @@ export const WhoSoundDesign: React.FC = () => (
       <Audio src={staticFile(WHO_SFX.entrance)} volume={0.045} />
     </Sequence>
 
-    <Sequence name="SFX · technology texture" from={WHO_SCENES.handsOn.from + 2} durationInFrames={30}>
+    <Sequence
+      name="SFX · technology texture"
+      from={WHO_SCENES.handsOn.from + 2}
+      durationInFrames={30}
+    >
       <Audio src={staticFile(WHO_SFX.technology)} volume={0.028} />
     </Sequence>
 
@@ -26,7 +30,7 @@ export const WhoSoundDesign: React.FC = () => (
 
     <Sequence
       name="SFX · history becomes motion"
-      from={WHO_SCENES.growth.from - 9}
+      from={WHO_SCENES.growth.from - WHO_TRANSITION_FRAMES}
       durationInFrames={18}
     >
       <Audio src={staticFile(WHO_SFX.photoRise)} volume={0.038} />
