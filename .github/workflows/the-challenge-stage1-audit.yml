@@ -1,0 +1,149 @@
+name: The Challenge Stage 1 Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/the-challenge-stage1-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Pull LFS media
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs pull
+          git lfs checkout
+
+      - name: Install inspection tools
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pil
+
+      - name: Verify and inspect Challenge masters
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit/metadata audit/contact-sheets audit/frames
+
+          files=(
+            "after 35seonds/20260808_IMG_7449-compressed.mp4"
+            "after 35seonds/20240427_115807_WA_e898bd84-ac7a-46d5-904e-5016986d5e1e-compressed.mp4"
+            "after 35seonds/20200103_ENJOY AI2019 FINAL-compressed.mp4"
+          )
+
+          : > audit/verification.txt
+          for f in "${files[@]}"; do
+            echo "FILE: $f" | tee -a audit/verification.txt
+            test -f "$f"
+            size=$(stat -c%s "$f")
+            echo "SIZE_BYTES: $size" | tee -a audit/verification.txt
+            if [ "$size" -lt 1024 ]; then
+              echo "STATUS: LFS_POINTER_OR_INVALID" | tee -a audit/verification.txt
+              exit 1
+            fi
+            echo "STATUS: ACCESSIBLE_MEDIA" | tee -a audit/verification.txt
+            echo | tee -a audit/verification.txt
+
+            base=$(basename "$f")
+            stem="${base%.*}"
+            ffprobe -v error -show_format -show_streams -of json "$f" > "audit/metadata/${stem}.json"
+          done
+
+      - name: Create full-duration contact sheets and dense samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            "after 35seonds/20260808_IMG_7449-compressed.mp4"
+            "after 35seonds/20240427_115807_WA_e898bd84-ac7a-46d5-904e-5016986d5e1e-compressed.mp4"
+            "after 35seonds/20200103_ENJOY AI2019 FINAL-compressed.mp4"
+          )
+
+          for f in "${files[@]}"; do
+            base=$(basename "$f")
+            stem="${base%.*}"
+            dir="audit/frames/${stem}"
+            mkdir -p "$dir/percent" "$dir/dense"
+
+            duration=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$f")
+            echo "$duration" > "$dir/duration.txt"
+
+            for pct in 0 10 20 30 40 50 60 70 80 90 98; do
+              t=$(python3 -c "print(float('$duration') * $pct / 100.0)")
+              printf -v p "%02d" "$pct"
+              ffmpeg -hide_banner -loglevel error -ss "$t" -i "$f" -frames:v 1 -vf "scale=640:-2" -q:v 2 "$dir/percent/${p}.jpg"
+            done
+
+            # Dense full-duration inspection every 5 seconds.
+            python3 - "$duration" > "$dir/dense-times.txt" <<'PY'
+import sys
+d=float(sys.argv[1])
+t=0.0
+while t < d:
+    print(f"{t:.3f}")
+    t += 5.0
+if d > 0:
+    print(f"{max(0,d-0.2):.3f}")
+PY
+            i=0
+            while IFS= read -r t; do
+              printf -v n "%04d" "$i"
+              ffmpeg -hide_banner -loglevel error -ss "$t" -i "$f" -frames:v 1 -vf "scale=480:-2" -q:v 3 "$dir/dense/${n}_${t}s.jpg"
+              i=$((i+1))
+            done < "$dir/dense-times.txt"
+          done
+
+      - name: Build contact sheets
+        shell: bash
+        run: |
+          python3 <<'PY'
+from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
+
+root=Path("audit/frames")
+out=Path("audit/contact-sheets")
+out.mkdir(parents=True, exist_ok=True)
+
+for media_dir in root.iterdir():
+    if not media_dir.is_dir():
+        continue
+    files=sorted((media_dir/"percent").glob("*.jpg"))
+    if not files:
+        continue
+    thumbs=[]
+    for p in files:
+        im=Image.open(p).convert("RGB")
+        canvas=Image.new("RGB",(640,400),"black")
+        canvas.paste(im,(0,0))
+        d=ImageDraw.Draw(canvas)
+        d.rectangle((0,360,640,400),fill="black")
+        d.text((12,370),f"{p.stem}% of duration",fill="white")
+        thumbs.append(canvas)
+    cols=3
+    rows=(len(thumbs)+cols-1)//cols
+    sheet=Image.new("RGB",(cols*640,rows*400),(20,20,20))
+    for idx,im in enumerate(thumbs):
+        sheet.paste(im,((idx%cols)*640,(idx//cols)*400))
+    sheet.save(out/f"{media_dir.name}_contact-sheet.jpg",quality=90)
+PY
+
+      - name: Upload Stage 1 audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-challenge-stage1-audit
+          path: audit
+          retention-days: 3
+          if-no-files-found: error
