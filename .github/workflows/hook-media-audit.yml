@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .media-audit
-          mkdir -p .media-audit/contact-sheets .media-audit/frames
+          mkdir -p .media-audit/contact-sheets .media-audit/dense-sheets .media-audit/frames .media-audit/dense-frames
 
           python3 - <<'PY'
           import json, os, subprocess, hashlib, math
@@ -119,6 +119,29 @@ jobs:
               subprocess.run([
                   "montage",*imgs,"-label","%t","-tile","4x","-geometry","640x360+8+28",
                   "-background","#0b1020","-fill","white","-pointsize","16",str(sheet)
+              ], check=True)
+
+              # Dense inspection pass: every 0.5s for short clips, every 5s for long clips.
+              dense_dir = Path(".media-audit/dense-frames") / p.stem
+              dense_dir.mkdir(parents=True, exist_ok=True)
+              step = 0.5 if duration <= 20 else 5.0
+              dense_ts = []
+              t = 0.1
+              idx = 0
+              while t < max(0.11, duration - 0.1):
+                  dense_ts.append(round(t,3))
+                  out = dense_dir / f"{idx:03d}_{t:07.3f}s.jpg"
+                  subprocess.run([
+                      "ffmpeg","-hide_banner","-loglevel","error","-ss",f"{t:.3f}","-i",str(p),
+                      "-frames:v","1","-vf","scale=360:-2:flags=lanczos","-q:v","4","-y",str(out)
+                  ], check=True)
+                  idx += 1
+                  t += step
+              dense_sheet = Path(".media-audit/dense-sheets") / f"{p.stem}.jpg"
+              dense_imgs = sorted(str(x) for x in dense_dir.glob("*.jpg"))
+              subprocess.run([
+                  "montage",*dense_imgs,"-label","%t","-tile","5x","-geometry","360x240+5+24",
+                  "-background","#0b1020","-fill","white","-pointsize","13",str(dense_sheet)
               ], check=True)
 
           Path(".media-audit/metadata.json").write_text(json.dumps(summaries, indent=2))
