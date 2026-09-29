@@ -1,7 +1,7 @@
 import React from 'react';
 import {Audio} from '@remotion/media';
 import {Sequence, staticFile} from 'remotion';
-import {WHO_SCENES, WHO_SFX, WHO_TRANSITION_FRAMES} from './whoConfig';
+import {WHO_SCENES, WHO_SFX} from './whoConfig';
 
 export const WhoSoundDesign: React.FC = () => (
   <>
@@ -17,7 +17,7 @@ export const WhoSoundDesign: React.FC = () => (
       <Audio src={staticFile(WHO_SFX.technology)} volume={0.028} />
     </Sequence>
 
-    {[0, 60, 171].map((offset) => (
+    {[0, 60, 159].map((offset) => (
       <Sequence
         key={offset}
         name={`SFX · history year ${offset}`}
@@ -29,12 +29,23 @@ export const WhoSoundDesign: React.FC = () => (
     ))}
 
     <Sequence
-      name="SFX · history becomes motion"
-      from={WHO_SCENES.growth.from - WHO_TRANSITION_FRAMES}
+      name="SFX · history becomes live motion"
+      from={WHO_SCENES.history.from + 153}
       durationInFrames={18}
     >
-      <Audio src={staticFile(WHO_SFX.photoRise)} volume={0.038} />
+      <Audio src={staticFile(WHO_SFX.photoRise)} volume={0.042} />
     </Sequence>
+
+    {[0, 28, 61].map((offset) => (
+      <Sequence
+        key={offset}
+        name={`SFX · growth montage ${offset}`}
+        from={WHO_SCENES.growth.from + offset}
+        durationInFrames={8}
+      >
+        <Audio src={staticFile(WHO_SFX.yearTick)} volume={offset === 0 ? 0.026 : 0.018} />
+      </Sequence>
+    ))}
 
     {[0, 21, 42].map((offset) => (
       <Sequence
