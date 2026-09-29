@@ -22,6 +22,14 @@ type HookShotProps = {
   objectPosition?: string;
   filter?: string;
   overlay?: string;
+  entryMotionFrames?: number;
+  entryTranslateX?: number;
+  entryBlurPx?: number;
+  entryScaleOffset?: number;
+  exitMotionFrames?: number;
+  exitTranslateX?: number;
+  exitBlurPx?: number;
+  exitScaleBoost?: number;
 };
 
 const clamp = {
@@ -44,13 +52,43 @@ export const HookShot: React.FC<HookShotProps> = ({
   objectPosition = '50% 50%',
   filter = 'contrast(1.05) saturate(1.01) brightness(.98)',
   overlay = 'linear-gradient(0deg, rgba(3,10,22,.07), transparent 70%)',
+  entryMotionFrames = 0,
+  entryTranslateX = 0,
+  entryBlurPx = 0,
+  entryScaleOffset = 0,
+  exitMotionFrames = 0,
+  exitTranslateX = 0,
+  exitBlurPx = 0,
+  exitScaleBoost = 0,
 }) => {
   const frame = useCurrentFrame();
   const lastFrame = Math.max(1, duration - 1);
 
-  const scale = interpolate(frame, [0, lastFrame], [scaleFrom, scaleTo], clamp);
-  const x = interpolate(frame, [0, lastFrame], [translateXFrom, translateXTo], clamp);
+  const baseScale = interpolate(frame, [0, lastFrame], [scaleFrom, scaleTo], clamp);
+  const baseX = interpolate(frame, [0, lastFrame], [translateXFrom, translateXTo], clamp);
   const y = interpolate(frame, [0, lastFrame], [translateYFrom, translateYTo], clamp);
+
+  const entryWeight =
+    entryMotionFrames > 0
+      ? interpolate(frame, [0, entryMotionFrames], [1, 0], clamp)
+      : 0;
+  const exitWeight =
+    exitMotionFrames > 0
+      ? interpolate(
+          frame,
+          [Math.max(0, lastFrame - exitMotionFrames), lastFrame],
+          [0, 1],
+          clamp,
+        )
+      : 0;
+
+  const scale =
+    baseScale + entryScaleOffset * entryWeight + exitScaleBoost * exitWeight;
+  const x =
+    baseX + entryTranslateX * entryWeight + exitTranslateX * exitWeight;
+  const motionBlur = entryBlurPx * entryWeight + exitBlurPx * exitWeight;
+  const mediaFilter =
+    motionBlur > 0.01 ? `${filter} blur(${motionBlur.toFixed(2)}px)` : filter;
 
   const mediaStyle: React.CSSProperties =
     rotation === 0
@@ -61,7 +99,7 @@ export const HookShot: React.FC<HookShotProps> = ({
           height: '100%',
           objectFit: 'cover',
           objectPosition,
-          filter,
+          filter: mediaFilter,
         }
       : {
           position: 'absolute',
@@ -71,7 +109,7 @@ export const HookShot: React.FC<HookShotProps> = ({
           height: 1920,
           objectFit: 'cover',
           objectPosition,
-          filter,
+          filter: mediaFilter,
           transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
           transformOrigin: '50% 50%',
         };
