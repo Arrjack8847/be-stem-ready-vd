@@ -9,17 +9,20 @@ const clamp = {
 export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
 
-  const shade = interpolate(frame, [0, 10, duration - 1], [0.08, 0.32, 0.46], clamp);
-  const opacity = interpolate(frame, [14, 23], [0, 1], clamp);
-  const y = interpolate(frame, [14, 24], [18, 0], clamp);
-  const tracking = interpolate(frame, [14, 28], [1.2, -2.0], clamp);
-  const subOpacity = interpolate(frame, [21, 31], [0, 1], clamp);
+  // Brand begins settling immediately, finishes animating by ~13.65s,
+  // and holds as a stable poster frame for the remainder of the hook.
+  const shade = interpolate(frame, [0, 10, duration - 1], [0.12, 0.38, 0.46], clamp);
+  const titleOpacity = interpolate(frame, [4, 18], [0, 1], clamp);
+  const titleY = interpolate(frame, [4, 18], [18, 0], clamp);
+  const tracking = interpolate(frame, [4, 18], [0.6, -1.6], clamp);
+  const subOpacity = interpolate(frame, [13, 27], [0, 1], clamp);
+  const accentOpacity = interpolate(frame, [5, 14], [0, 1], clamp);
 
   return (
     <AbsoluteFill>
       <AbsoluteFill
         style={{
-          background: `linear-gradient(0deg, rgba(3,10,22,${shade}), rgba(3,10,22,.08) 62%, rgba(3,10,22,.025))`,
+          background: `linear-gradient(0deg, rgba(3,10,22,${shade}), rgba(3,10,22,.14) 55%, rgba(3,10,22,.035))`,
         }}
       />
 
@@ -27,28 +30,30 @@ export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
         style={{
           position: 'absolute',
           left: 116,
-          bottom: 114,
+          bottom: 112,
           color: '#f5f8ff',
           fontFamily: 'Space Grotesk',
-          transform: `translateY(${y}px)`,
-          opacity,
+          transform: `translateY(${titleY}px)`,
+          opacity: titleOpacity,
         }}
       >
         <div
           style={{
             width: 54,
-            height: 4,
+            height: 3,
             background: '#72e4f5',
             marginBottom: 18,
+            opacity: accentOpacity,
           }}
         />
 
         <div
           style={{
-            fontSize: 76,
+            fontSize: 78,
             lineHeight: 0.98,
             fontWeight: 700,
             letterSpacing: tracking,
+            textShadow: '0 2px 18px rgba(0,0,0,.20)',
           }}
         >
           BE STEM READY
@@ -60,7 +65,7 @@ export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
             fontFamily: 'Inter',
             fontSize: 23,
             fontWeight: 500,
-            letterSpacing: 3.2,
+            letterSpacing: 3.0,
             opacity: subOpacity,
           }}
         >

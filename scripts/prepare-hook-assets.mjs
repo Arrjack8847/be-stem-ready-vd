@@ -74,11 +74,9 @@ for (const item of workingCopies) {
   }
 
   await copyFile(source, destination);
-  console.log(`Prepared non-destructive hook working copy: ${item.destination}`);
+  console.log(`Prepared hook working copy: ${item.destination}`);
 }
 
-// The 4K HEVC competition master has one committed 1080p H.264 proxy.
-// Ensure Git LFS has materialized it before Remotion starts.
 const competitionProxy = path.join(
   root,
   'public',
@@ -100,7 +98,7 @@ const makeNoise = (seed) => {
   let state = seed >>> 0;
   return () => {
     state = (1664525 * state + 1013904223) >>> 0;
-    return state / 0xffffffff * 2 - 1;
+    return (state / 0xffffffff) * 2 - 1;
   };
 };
 
@@ -141,8 +139,44 @@ const impact = () => {
   });
 };
 
+const mechanical = () => {
+  const length = Math.round(sampleRate * 0.55);
+  const noise = makeNoise(0x0c186001);
+  return Array.from({length}, (_, index) => {
+    const time = index / sampleRate;
+    const progress = index / Math.max(1, length - 1);
+    const envelope = Math.sin(Math.PI * progress);
+    const servo = Math.sin(2 * Math.PI * (135 + progress * 85) * time);
+    const texture = noise() * 0.08;
+    return (servo * 0.06 + texture) * envelope;
+  });
+};
+
+const achievementHit = () => {
+  const length = Math.round(sampleRate * 0.28);
+  return Array.from({length}, (_, index) => {
+    const time = index / sampleRate;
+    const low = Math.sin(2 * Math.PI * 92 * time) * Math.exp(-time * 15);
+    const warm = Math.sin(2 * Math.PI * 276 * time) * Math.exp(-time * 24);
+    return low * 0.38 + warm * 0.055;
+  });
+};
+
+const scaleRiser = () => {
+  const length = Math.round(sampleRate * 0.60);
+  const noise = makeNoise(0x5ca1e002);
+  let smooth = 0;
+  return Array.from({length}, (_, index) => {
+    const progress = index / Math.max(1, length - 1);
+    smooth += (noise() - smooth) / 9;
+    const envelope = progress * progress;
+    const tone = Math.sin(2 * Math.PI * (90 + 240 * progress) * (index / sampleRate));
+    return (smooth * 0.16 + tone * 0.025) * envelope;
+  });
+};
+
 const scaleWhoosh = () => {
-  const length = Math.round(sampleRate * 0.38);
+  const length = Math.round(sampleRate * 0.42);
   const noise = makeNoise(0x5ca1e001);
   let smoothed = 0;
   let phase = 0;
@@ -151,26 +185,29 @@ const scaleWhoosh = () => {
     const progress = index / Math.max(1, length - 1);
     smoothed += (noise() - smoothed) / 7;
     const envelope = Math.pow(Math.sin(Math.PI * progress), 1.7);
-    const frequency = 190 + 420 * progress;
+    const frequency = 170 + 390 * progress;
     phase += (2 * Math.PI * frequency) / sampleRate;
-    return (smoothed * 0.36 + Math.sin(phase) * 0.035) * envelope;
+    return (smoothed * 0.34 + Math.sin(phase) * 0.03) * envelope;
   });
 };
 
-const achievementHit = () => {
-  const length = Math.round(sampleRate * 0.24);
+const brandHit = () => {
+  const length = Math.round(sampleRate * 0.30);
   return Array.from({length}, (_, index) => {
     const time = index / sampleRate;
-    const low = Math.sin(2 * Math.PI * 92 * time) * Math.exp(-time * 16);
-    const mid = Math.sin(2 * Math.PI * 184 * time) * Math.exp(-time * 24);
-    return low * 0.46 + mid * 0.10;
+    const low = Math.sin(2 * Math.PI * 62 * time) * Math.exp(-time * 13);
+    const soft = Math.sin(2 * Math.PI * 248 * time) * Math.exp(-time * 22);
+    return low * 0.40 + soft * 0.05;
   });
 };
 
 const generatedSfx = [
   ['impact.wav', impact()],
-  ['scale-whoosh.wav', scaleWhoosh()],
+  ['mechanical-detail.wav', mechanical()],
   ['achievement-hit.wav', achievementHit()],
+  ['scale-riser.wav', scaleRiser()],
+  ['scale-whoosh.wav', scaleWhoosh()],
+  ['brand-hit.wav', brandHit()],
 ];
 
 for (const [filename, samples] of generatedSfx) {

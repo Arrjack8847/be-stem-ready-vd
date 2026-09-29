@@ -2,17 +2,17 @@ import {hookAssets} from '../data/hook-assets';
 
 export const HOOK_DURATION = 450;
 
-// Editorial guide approved for the 15-second opening.
-// Final beat-level nudges can still move individual cuts by a few frames after preview.
+// Refined trailer rhythm at 30 fps:
+// 0.00 / 1.47 / 3.07 / 4.70 / 6.37 / 8.20 / 10.57 / 12.77 / 15.00
 export const HOOK_CUTS = {
   techStart: 0,
-  buildStart: 54,
-  humanStart: 108,
-  competitionStart: 159,
-  achievementStart: 218,
-  scaleStart: 278,
-  heroStart: 339,
-  brandStart: 401,
+  buildStart: 44,
+  humanStart: 92,
+  competitionStart: 141,
+  achievementStart: 191,
+  scaleStart: 246,
+  heroStart: 317,
+  brandStart: 383,
   end: 450,
 } as const;
 
@@ -27,7 +27,7 @@ export const HOOK_SOURCES = {
   brand: hookAssets.brand.workingPath,
 } as const;
 
-// Remotion trim values are expressed on the 30 fps composition timeline.
+// trimBefore is timeline-frame based at the 30 fps composition rate.
 export const HOOK_TRIMS = {
   tech: Math.round(hookAssets.tech.candidateRange.startSeconds * 30),
   build: Math.round(hookAssets.build.candidateRange.startSeconds * 30),
@@ -41,6 +41,9 @@ export const HOOK_TRIMS = {
 
 export const HOOK_SFX = {
   impact: 'hook/sfx/impact.wav',
-  scaleWhoosh: 'hook/sfx/scale-whoosh.wav',
+  mechanical: 'hook/sfx/mechanical-detail.wav',
   achievementHit: 'hook/sfx/achievement-hit.wav',
+  scaleRiser: 'hook/sfx/scale-riser.wav',
+  scaleWhoosh: 'hook/sfx/scale-whoosh.wav',
+  brandHit: 'hook/sfx/brand-hit.wav',
 } as const;

@@ -3,6 +3,7 @@ import {Audio} from '@remotion/media';
 import {AbsoluteFill, Sequence, staticFile} from 'remotion';
 import {ASSETS} from './assets';
 import {CinematicHook, HOOK_DURATION} from './hook/CinematicHook';
+import {hookMusicVolume} from './hook/HookSoundDesign';
 import {VIDEO, WhoIsBSRScene} from './WhoIsBSRScene';
 
 export const FULL_FILM_DURATION = HOOK_DURATION + VIDEO.duration;
@@ -25,7 +26,7 @@ export const FullFilm: React.FC = () => (
       name="Master music · continuous"
       src={staticFile(ASSETS.music)}
       durationInFrames={FULL_FILM_DURATION}
-      volume={0.76}
+      volume={(frame) => (frame < HOOK_DURATION ? hookMusicVolume(frame) : 0.76)}
     />
   </AbsoluteFill>
 );

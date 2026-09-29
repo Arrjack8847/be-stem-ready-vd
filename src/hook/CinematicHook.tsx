@@ -1,17 +1,11 @@
 import React from 'react';
 import {Audio} from '@remotion/media';
-import {
-  AbsoluteFill,
-  Sequence,
-  interpolate,
-  staticFile,
-  useCurrentFrame,
-} from 'remotion';
+import {AbsoluteFill, Sequence, staticFile} from 'remotion';
 import {ASSETS} from '../assets';
 import {Fonts} from '../Fonts';
 import {BrandReveal} from './BrandReveal';
 import {HookShot} from './HookShot';
-import {HookSoundDesign} from './HookSoundDesign';
+import {HookSoundDesign, hookMusicVolume} from './HookSoundDesign';
 import {
   HOOK_CUTS,
   HOOK_DURATION,
@@ -22,49 +16,6 @@ import {
 export {HOOK_DURATION} from './hookConfig';
 
 const durationBetween = (start: number, end: number) => end - start;
-
-const TechMarker: React.FC<{duration: number}> = ({duration}) => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(
-    frame,
-    [18, 24, 36, 43],
-    [0, 0.38, 0.38, 0],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    },
-  );
-
-  return (
-    <AbsoluteFill style={{opacity, pointerEvents: 'none'}}>
-      <div
-        style={{
-          position: 'absolute',
-          right: 150,
-          top: 188,
-          width: 112,
-          height: 66,
-          borderTop: '1px solid rgba(114,228,245,.74)',
-          borderRight: '1px solid rgba(114,228,245,.74)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: 149,
-          top: 269,
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fontWeight: 500,
-          letterSpacing: 2.1,
-          color: '#72e4f5',
-        }}
-      >
-        STEM / ROBOTICS
-      </div>
-    </AbsoluteFill>
-  );
-};
 
 export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = false}) => (
   <AbsoluteFill
@@ -78,7 +29,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
     <Fonts />
 
     <Sequence
-      name="01 · Technology impact · macro"
+      name="01 · Technology impact"
       from={HOOK_CUTS.techStart}
       durationInFrames={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.buildStart)}
     >
@@ -86,19 +37,19 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         src={HOOK_SOURCES.tech}
         duration={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.buildStart)}
         trimBefore={HOOK_TRIMS.tech}
-        speedCurve={{from: 1.18, to: 0.88}}
-        scaleFrom={1.11}
-        scaleTo={1.17}
-        translateXFrom={-12}
-        translateXTo={4}
+        playbackRate={1.08}
+        scaleFrom={1.075}
+        scaleTo={1.105}
+        translateXFrom={-7}
+        translateXTo={2}
         objectPosition="52% 54%"
-        filter="contrast(1.16) saturate(.98) brightness(.89)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.21), rgba(3,10,22,.01) 60%, rgba(3,10,22,.06))"
+        filter="contrast(1.13) saturate(.99) brightness(.95)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 72%)"
       />
     </Sequence>
 
     <Sequence
-      name="02 · Student building · close"
+      name="02 · Build / create"
       from={HOOK_CUTS.buildStart}
       durationInFrames={durationBetween(HOOK_CUTS.buildStart, HOOK_CUTS.humanStart)}
     >
@@ -108,17 +59,17 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         trimBefore={HOOK_TRIMS.build}
         rotation={-90}
         scaleFrom={1.025}
-        scaleTo={1.065}
-        translateXFrom={8}
-        translateXTo={-4}
+        scaleTo={1.06}
+        translateXFrom={9}
+        translateXTo={-3}
         objectPosition="50% 50%"
-        filter="contrast(1.08) saturate(1.00) brightness(.95)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.13), transparent 68%, rgba(3,10,22,.025))"
+        filter="contrast(1.06) saturate(1.00) brightness(.99)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.055), transparent 76%)"
       />
     </Sequence>
 
     <Sequence
-      name="03 · Human connection · face"
+      name="03 · Human connection"
       from={HOOK_CUTS.humanStart}
       durationInFrames={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
     >
@@ -127,17 +78,18 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         duration={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
         trimBefore={HOOK_TRIMS.human}
         rotation={-90}
-        scaleFrom={1.16}
-        scaleTo={1.165}
-        translateXFrom={-38}
-        translateXTo={-34}
-        filter="contrast(1.04) saturate(.98) brightness(.97)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.10), transparent 68%)"
+        playbackRate={1}
+        scaleFrom={1.145}
+        scaleTo={1.151}
+        translateXFrom={-34}
+        translateXTo={-32}
+        filter="contrast(1.03) saturate(.99) brightness(1.01)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.04), transparent 78%)"
       />
     </Sequence>
 
     <Sequence
-      name="04 · Competition energy · wide"
+      name="04 · Competition energy"
       from={HOOK_CUTS.competitionStart}
       durationInFrames={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
     >
@@ -145,17 +97,18 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         src={HOOK_SOURCES.competition}
         duration={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
         trimBefore={HOOK_TRIMS.competition}
-        scaleFrom={1.02}
-        scaleTo={1.05}
+        playbackRate={1.02}
+        scaleFrom={1.002}
+        scaleTo={1.018}
         translateXFrom={0}
-        translateXTo={-5}
-        filter="contrast(1.08) saturate(1.01) brightness(.96)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 72%)"
+        translateXTo={-3}
+        filter="contrast(1.06) saturate(1.015) brightness(1.01)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.035), transparent 82%)"
       />
     </Sequence>
 
     <Sequence
-      name="05 · Achievement · emotional medium"
+      name="05 · Achievement"
       from={HOOK_CUTS.achievementStart}
       durationInFrames={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.scaleStart)}
     >
@@ -164,17 +117,17 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         duration={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.scaleStart)}
         trimBefore={HOOK_TRIMS.achievement}
         playbackRate={1}
-        scaleFrom={1.04}
-        scaleTo={1.07}
-        translateYFrom={3}
-        translateYTo={-3}
-        filter="contrast(1.07) saturate(1.035) brightness(.98) sepia(.025)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 70%)"
+        scaleFrom={1.025}
+        scaleTo={1.03}
+        translateYFrom={2}
+        translateYTo={-1}
+        filter="contrast(1.055) saturate(1.025) brightness(1.01) sepia(.018)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.045), transparent 80%)"
       />
     </Sequence>
 
     <Sequence
-      name="06 · Scale reveal · extreme wide"
+      name="06 · Scale reveal"
       from={HOOK_CUTS.scaleStart}
       durationInFrames={durationBetween(HOOK_CUTS.scaleStart, HOOK_CUTS.heroStart)}
     >
@@ -182,16 +135,16 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         src={HOOK_SOURCES.scale}
         duration={durationBetween(HOOK_CUTS.scaleStart, HOOK_CUTS.heroStart)}
         trimBefore={HOOK_TRIMS.scale}
-        playbackRate={0.96}
+        playbackRate={1}
         scaleFrom={1.0}
-        scaleTo={1.012}
-        filter="contrast(1.055) saturate(.98) brightness(.98)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.07), transparent 78%)"
+        scaleTo={1.003}
+        filter="contrast(1.035) saturate(.99) brightness(1.01)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.02), transparent 88%)"
       />
     </Sequence>
 
     <Sequence
-      name="07 · Future technology · hero close"
+      name="07 · Future technology hero"
       from={HOOK_CUTS.heroStart}
       durationInFrames={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)}
     >
@@ -199,20 +152,19 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         src={HOOK_SOURCES.hero}
         duration={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)}
         trimBefore={HOOK_TRIMS.hero}
-        speedCurve={{from: 1.07, to: 0.95}}
-        scaleFrom={1.09}
-        scaleTo={1.145}
-        translateXFrom={8}
+        playbackRate={1.04}
+        scaleFrom={1.10}
+        scaleTo={1.155}
+        translateXFrom={10}
         translateXTo={-5}
-        objectPosition="54% 54%"
-        filter="contrast(1.14) saturate(1.03) brightness(.91)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.18), rgba(3,10,22,.01) 62%, rgba(3,10,22,.045))"
+        objectPosition="58% 55%"
+        filter="contrast(1.12) saturate(1.025) brightness(.96)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.08), transparent 74%)"
       />
-      <TechMarker duration={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)} />
     </Sequence>
 
     <Sequence
-      name="08 · Be STEM Ready · brand"
+      name="08 · Be STEM Ready"
       from={HOOK_CUTS.brandStart}
       durationInFrames={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)}
     >
@@ -220,11 +172,12 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
         src={HOOK_SOURCES.brand}
         duration={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)}
         trimBefore={HOOK_TRIMS.brand}
+        playbackRate={0.98}
         scaleFrom={1.018}
-        scaleTo={1.025}
+        scaleTo={1.02}
         objectPosition="50% 48%"
-        filter="contrast(1.08) saturate(.99) brightness(.88)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.17), rgba(3,10,22,.015) 66%)"
+        filter="contrast(1.07) saturate(.99) brightness(.92)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.16), rgba(3,10,22,.015) 70%)"
       />
       <BrandReveal duration={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)} />
     </Sequence>
@@ -233,7 +186,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       style={{
         pointerEvents: 'none',
         background:
-          'radial-gradient(circle at 50% 48%, transparent 53%, rgba(2,7,16,.09) 100%)',
+          'radial-gradient(circle at 50% 48%, transparent 58%, rgba(2,7,16,.055) 100%)',
       }}
     />
 
@@ -241,10 +194,10 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
 
     {withMusic ? (
       <Audio
-        name="Music · hook 00:00–00:15"
+        name="Music · dynamic hook mix"
         src={staticFile(ASSETS.music)}
         durationInFrames={HOOK_DURATION}
-        volume={0.76}
+        volume={hookMusicVolume}
       />
     ) : null}
   </AbsoluteFill>
