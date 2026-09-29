@@ -15,9 +15,9 @@ export const WHO_SCENES = {
 export const WHO_SOURCES = {
   identity: 'media/who/01-identity/20240430_IMG_4457.mp4',
   enjoyAI: 'media/who/02-enjoy-ai/20240702_ENJOY-AI-2024.mp4',
-  history2022: 'media/who/03-history/2022.jpg',
-  history2023a: 'media/who/03-history/2023-a.jpg',
-  history2023b: 'media/who/03-history/2023-b.jpg',
+  history2022: 'bsr-assets/20220403_PHOTO-2022-04-03-18-53-28 2.jpg',
+  history2023a: 'bsr-assets/20230115_PHOTO-2023-01-15-10-05-51.jpg',
+  history2023b: 'bsr-assets/20230115_PHOTO-2023-01-15-10-07-47 2.jpg',
   growth: 'media/who/_proxy/20240429_IMG_4384-proxy.mp4',
   growthCourse: 'media/who/_proxy/20240429_IMG_4388-proxy.mp4',
 } as const;
