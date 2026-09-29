@@ -1,0 +1,102 @@
+name: Who Is BSR Media Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/who-is-bsr-media-audit.yml'
+
+permissions:
+  contents: read
+
+env:
+  SRC_DIR: after 15 seconds
+  OUT_DIR: who-is-bsr-audit
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Verify LFS binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs pull --include="after 15 seconds/*.mp4"
+          mkdir -p "$OUT_DIR"
+          {
+            echo -e "file\tbytes\tstatus"
+            for f in \
+              "$SRC_DIR/20240429_IMG_4384.mp4" \
+              "$SRC_DIR/20240429_IMG_4388.mp4" \
+              "$SRC_DIR/20240430_IMG_4457-compressed.mp4" \
+              "$SRC_DIR/20240702_ENJOY AI 2024 V2-compressed.mp4"; do
+              bytes=$(stat -c%s "$f")
+              if [ "$bytes" -le 1000 ]; then status="LFS_POINTER_ONLY"; else status="ACCESSIBLE_MEDIA"; fi
+              echo -e "${f}\t${bytes}\t${status}"
+            done
+          } > "$OUT_DIR/lfs-verification.tsv"
+          cat "$OUT_DIR/lfs-verification.tsv"
+
+      - name: Record technical metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR/ffprobe"
+          for f in \
+            "$SRC_DIR/20240429_IMG_4384.mp4" \
+            "$SRC_DIR/20240429_IMG_4388.mp4" \
+            "$SRC_DIR/20240430_IMG_4457-compressed.mp4" \
+            "$SRC_DIR/20240702_ENJOY AI 2024 V2-compressed.mp4" \
+            "$SRC_DIR/20220403_PHOTO-2022-04-03-18-53-28 2.jpg" \
+            "$SRC_DIR/20230115_PHOTO-2023-01-15-10-05-51.jpg" \
+            "$SRC_DIR/20230115_PHOTO-2023-01-15-10-07-47 2.jpg"; do
+            base=$(basename "$f")
+            ffprobe -v error -show_streams -show_format -of json "$f" > "$OUT_DIR/ffprobe/${base}.json"
+          done
+
+      - name: Generate full-duration overview frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR/frames"
+          videos=(
+            "20240429_IMG_4384.mp4"
+            "20240429_IMG_4388.mp4"
+            "20240430_IMG_4457-compressed.mp4"
+            "20240702_ENJOY AI 2024 V2-compressed.mp4"
+          )
+          percents=(0 10 20 30 40 50 60 70 80 90 98)
+          for base in "${videos[@]}"; do
+            f="$SRC_DIR/$base"
+            stem="${base%.mp4}"
+            mkdir -p "$OUT_DIR/frames/$stem"
+            dur=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$f")
+            for p in "${percents[@]}"; do
+              ts=$(python3 -c "print(float('$dur')*$p/100.0)")
+              printf -v label "%03d" "$p"
+              ffmpeg -hide_banner -loglevel error -ss "$ts" -i "$f" -frames:v 1 -vf "scale='min(1280,iw)':-2" -q:v 3 "$OUT_DIR/frames/$stem/${label}pct.jpg"
+            done
+          done
+
+      - name: Copy historical photos for visual inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR/photos"
+          cp "$SRC_DIR/20220403_PHOTO-2022-04-03-18-53-28 2.jpg" "$OUT_DIR/photos/"
+          cp "$SRC_DIR/20230115_PHOTO-2023-01-15-10-05-51.jpg" "$OUT_DIR/photos/"
+          cp "$SRC_DIR/20230115_PHOTO-2023-01-15-10-07-47 2.jpg" "$OUT_DIR/photos/"
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: who-is-bsr-media-audit
+          path: who-is-bsr-audit
+          if-no-files-found: error
+          retention-days: 3
