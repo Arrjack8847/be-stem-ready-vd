@@ -23,6 +23,13 @@ jobs:
           lfs: true
           fetch-depth: 1
 
+      - name: Install FFmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Verify LFS binaries
         shell: bash
         run: |
