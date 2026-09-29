@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .after15-audit
-          mkdir -p .after15-audit/contact .after15-audit/frames
+          mkdir -p .after15-audit/contact .after15-audit/contact-mini .after15-audit/frames
 
           python3 - <<'PY'
           import json, subprocess, hashlib, base64
@@ -112,6 +112,22 @@ jobs:
 
               raw=sheet.read_bytes()
               (Path(".after15-audit/contact")/f"{p.stem}.b64").write_text(base64.b64encode(raw).decode("ascii"))
+
+              mini=Path(".after15-audit/contact-mini")/f"{p.stem}.jpg"
+              subprocess.run([
+                  "montage",*imgs,
+                  "-label","%t",
+                  "-tile","8x",
+                  "-geometry","180x122+2+14",
+                  "-quality","62",
+                  "-background","#08111e",
+                  "-fill","white",
+                  "-pointsize","9",
+                  str(mini)
+              ],check=True)
+              mini_raw=mini.read_bytes()
+              (Path(".after15-audit/contact-mini")/f"{p.stem}.b64").write_text(base64.b64encode(mini_raw).decode("ascii"))
+
               (outdir/"timestamps.json").write_text(json.dumps(timestamps,indent=2))
 
           Path(".after15-audit/metadata.json").write_text(json.dumps(results,indent=2))
