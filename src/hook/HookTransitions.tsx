@@ -1,7 +1,14 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {Video} from '@remotion/media';
+import {
+  AbsoluteFill,
+  Sequence,
+  interpolate,
+  staticFile,
+  useCurrentFrame,
+} from 'remotion';
 import {COLORS} from '../assets';
-import {HOOK_CUTS} from './hookConfig';
+import {HOOK_CUTS, HOOK_SOURCES, HOOK_TRIMS} from './hookConfig';
 
 const clamp = {
   extrapolateLeft: 'clamp' as const,
@@ -15,10 +22,80 @@ const pulse = (frame: number, start: number, peak: number, end: number, max: num
       ? interpolate(frame, [start, peak], [0, max], clamp)
       : interpolate(frame, [peak, end], [max, 0], clamp);
 
+const ScaleToFutureReveal: React.FC = () => {
+  const frame = useCurrentFrame();
+  const progress = interpolate(frame, [0, 7], [0, 1], clamp);
+  const boundaryX = interpolate(progress, [0, 1], [-10, 1930], clamp);
+  const trailOpacity = interpolate(progress, [0, 0.12, 0.82, 1], [0, 0.10, 0.08, 0], clamp);
+
+  return (
+    <AbsoluteFill style={{pointerEvents: 'none', overflow: 'hidden'}}>
+      <AbsoluteFill
+        style={{
+          clipPath: `inset(0 ${Math.max(0, 100 - progress * 100)}% 0 0)`,
+          overflow: 'hidden',
+        }}
+      >
+        <AbsoluteFill
+          style={{
+            transform: 'translate3d(10px, 0, 0) scale(1.10)',
+            transformOrigin: '50% 50%',
+          }}
+        >
+          <Video
+            src={staticFile(HOOK_SOURCES.hero)}
+            trimBefore={Math.max(0, HOOK_TRIMS.hero - 7)}
+            playbackRate={1.04}
+            muted
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: '58% 55%',
+              filter: 'contrast(1.12) saturate(1.025) brightness(.96)',
+            }}
+          />
+        </AbsoluteFill>
+      </AbsoluteFill>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: boundaryX,
+          top: 0,
+          width: 2,
+          height: '100%',
+          background: COLORS.cyan,
+          opacity: interpolate(progress, [0, 0.08, 0.86, 1], [0, 0.82, 0.78, 0], clamp),
+          boxShadow: '0 0 16px rgba(114,228,245,.16)',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          left: boundaryX - 110,
+          top: 0,
+          width: 110,
+          height: '100%',
+          opacity: trailOpacity,
+          background: 'linear-gradient(90deg, transparent, rgba(114,228,245,.52))',
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
+
 export const HookTransitions: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const techBuild = pulse(frame, HOOK_CUTS.buildStart - 3, HOOK_CUTS.buildStart, HOOK_CUTS.buildStart + 3, 1);
+  const techBuild = pulse(
+    frame,
+    HOOK_CUTS.buildStart - 3,
+    HOOK_CUTS.buildStart,
+    HOOK_CUTS.buildStart + 3,
+    1,
+  );
   const techBuildX = interpolate(
     frame,
     [HOOK_CUTS.buildStart - 3, HOOK_CUTS.buildStart + 3],
@@ -48,20 +125,6 @@ export const HookTransitions: React.FC = () => {
     clamp,
   );
 
-  const futureWipe = pulse(
-    frame,
-    HOOK_CUTS.heroStart - 4,
-    HOOK_CUTS.heroStart,
-    HOOK_CUTS.heroStart + 6,
-    1,
-  );
-  const wipeX = interpolate(
-    frame,
-    [HOOK_CUTS.heroStart - 4, HOOK_CUTS.heroStart + 6],
-    [-80, 2000],
-    clamp,
-  );
-
   const collapseProgress = interpolate(
     frame,
     [HOOK_CUTS.brandStart - 12, HOOK_CUTS.brandStart + 5],
@@ -82,6 +145,7 @@ export const HookTransitions: React.FC = () => {
 
   return (
     <AbsoluteFill style={{pointerEvents: 'none'}}>
+      {/* TECHNOLOGY -> BUILD: almost invisible directional carry. */}
       <div
         style={{
           position: 'absolute',
@@ -96,6 +160,7 @@ export const HookTransitions: React.FC = () => {
         }}
       />
 
+      {/* HUMAN -> COMPETITION: controlled energy pulse, never a white flash. */}
       <AbsoluteFill
         style={{
           opacity: competitionPulse,
@@ -104,6 +169,7 @@ export const HookTransitions: React.FC = () => {
         }}
       />
 
+      {/* ACHIEVEMENT -> SCALE: expansion is carried mostly by sound; aerial stays clean. */}
       <div
         style={{
           position: 'absolute',
@@ -127,30 +193,7 @@ export const HookTransitions: React.FC = () => {
         }}
       />
 
-      <div
-        style={{
-          position: 'absolute',
-          left: wipeX,
-          top: 0,
-          width: 3,
-          height: '100%',
-          opacity: futureWipe * 0.78,
-          background: COLORS.cyan,
-          boxShadow: '0 0 18px rgba(114,228,245,.18)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: wipeX - 130,
-          top: 0,
-          width: 132,
-          height: '100%',
-          opacity: futureWipe * 0.07,
-          background: 'linear-gradient(90deg, transparent, rgba(114,228,245,.7))',
-        }}
-      />
-
+      {/* FUTURE -> BRAND: one cyan line survives the graphic collapse and resolves toward the lockup. */}
       <div
         style={{
           position: 'absolute',
@@ -163,6 +206,15 @@ export const HookTransitions: React.FC = () => {
           boxShadow: '0 0 16px rgba(114,228,245,.14)',
         }}
       />
+
+      {/* SCALE -> FUTURE: the cyan line is the masking boundary that actually reveals the hero shot. */}
+      <Sequence
+        from={HOOK_CUTS.heroStart - 7}
+        durationInFrames={8}
+        name="Transition · Scale to Future line reveal"
+      >
+        <ScaleToFutureReveal />
+      </Sequence>
     </AbsoluteFill>
   );
 };

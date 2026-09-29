@@ -79,21 +79,6 @@ export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
           STEM EDUCATION CANNOT WAIT.
         </div>
       </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          right: 68,
-          bottom: 54,
-          fontFamily: 'Inter',
-          fontSize: 10,
-          letterSpacing: 3,
-          color: '#f5f8ff',
-          opacity: interpolate(frame, [16, 27], [0, 0.34], clamp),
-        }}
-      >
-        STEM / EDUCATION / FUTURE
-      </div>
     </AbsoluteFill>
   );
 };

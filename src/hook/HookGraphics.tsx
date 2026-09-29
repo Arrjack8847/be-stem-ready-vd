@@ -166,7 +166,7 @@ export const BuildOverlay: React.FC<{duration: number}> = ({duration}) => {
           transform: `translateX(${labelX}px)`,
         }}
       >
-        <div style={{...metaStyle, fontSize: 13, opacity: 0.58}}>01 / PROCESS</div>
+        <div style={{...metaStyle, fontSize: 13, opacity: 0.58}}>01 / BUILD</div>
         <div style={{...labelStyle, fontSize: 31, marginTop: 5}}>BUILD</div>
       </div>
     </AbsoluteFill>
