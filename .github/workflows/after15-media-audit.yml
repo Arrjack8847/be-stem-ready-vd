@@ -1,0 +1,126 @@
+name: After 15 Seconds Media Audit
+
+on:
+  push:
+    paths:
+      - ".github/workflows/after15-media-audit.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS media
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Install media tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+
+      - name: Inspect 00:15-00:36 source pool
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .after15-audit
+          mkdir -p .after15-audit/contact .after15-audit/frames
+
+          python3 - <<'PY'
+          import json, subprocess, hashlib, base64
+          from pathlib import Path
+
+          files = [
+              Path("after 15 seconds/20240430_IMG_4457-compressed.mp4"),
+              Path("after 15 seconds/20240702_ENJOY AI 2024 V2-compressed.mp4"),
+              Path("after 15 seconds/20240429_IMG_4384.mp4"),
+              Path("after 15 seconds/20240429_IMG_4388.mp4"),
+          ]
+
+          def run(cmd):
+              return subprocess.check_output(cmd, text=True)
+
+          def frac(v):
+              if not v or v == "0/0":
+                  return 0.0
+              if "/" in v:
+                  a,b=v.split("/",1)
+                  return float(a)/float(b) if float(b) else 0.0
+              return float(v)
+
+          results=[]
+          for p in files:
+              probe=json.loads(run(["ffprobe","-v","error","-show_streams","-show_format","-of","json",str(p)]))
+              vs=next(s for s in probe["streams"] if s.get("codec_type")=="video")
+              aus=[s for s in probe["streams"] if s.get("codec_type")=="audio"]
+              dur=float(probe.get("format",{}).get("duration") or vs.get("duration") or 0)
+              avg=frac(vs.get("avg_frame_rate"))
+              nominal=frac(vs.get("r_frame_rate"))
+              size=p.stat().st_size
+              results.append({
+                  "filename":p.name,
+                  "path":str(p).replace("\\","/"),
+                  "width":int(vs.get("width",0)),
+                  "height":int(vs.get("height",0)),
+                  "avg_fps":round(avg,4),
+                  "nominal_fps":round(nominal,4),
+                  "duration_seconds":round(dur,3),
+                  "codec":vs.get("codec_name"),
+                  "profile":vs.get("profile"),
+                  "pix_fmt":vs.get("pix_fmt"),
+                  "audio":bool(aus),
+                  "audio_codec":aus[0].get("codec_name") if aus else None,
+                  "size_bytes":size,
+                  "size_mb":round(size/1024/1024,2),
+                  "bit_rate":int(probe.get("format",{}).get("bit_rate") or 0),
+                  "sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+              })
+
+              outdir=Path(".after15-audit/frames")/p.stem
+              outdir.mkdir(parents=True, exist_ok=True)
+              step=0.75 if dur <= 24 else 1.5 if dur <= 48 else 3.0
+              timestamps=[]
+              t=0.1
+              idx=0
+              while t < max(0.11,dur-0.08) and idx < 48:
+                  timestamps.append(round(t,2))
+                  out=outdir/f"{idx:03d}_{t:06.2f}s.jpg"
+                  subprocess.run([
+                      "ffmpeg","-hide_banner","-loglevel","error","-ss",f"{t:.3f}","-i",str(p),
+                      "-frames:v","1","-vf","scale=320:-2:flags=lanczos",
+                      "-q:v","5","-y",str(out)
+                  ],check=True)
+                  idx+=1
+                  t+=step
+
+              imgs=sorted(str(x) for x in outdir.glob("*.jpg"))
+              sheet=Path(".after15-audit/contact")/f"{p.stem}.jpg"
+              subprocess.run([
+                  "montage",*imgs,
+                  "-label","%t",
+                  "-tile","6x",
+                  "-geometry","320x220+4+20",
+                  "-background","#08111e",
+                  "-fill","white",
+                  "-pointsize","12",
+                  str(sheet)
+              ],check=True)
+
+              raw=sheet.read_bytes()
+              (Path(".after15-audit/contact")/f"{p.stem}.b64").write_text(base64.b64encode(raw).decode("ascii"))
+              (outdir/"timestamps.json").write_text(json.dumps(timestamps,indent=2))
+
+          Path(".after15-audit/metadata.json").write_text(json.dumps(results,indent=2))
+          PY
+
+      - name: Commit audit outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .after15-audit
+          git commit -m "Add after-15 media audit outputs [skip ci]" || exit 0
+          git push
