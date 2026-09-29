@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .after15-audit
-          mkdir -p .after15-audit/contact .after15-audit/contact-mini .after15-audit/frames
+          mkdir -p .after15-audit/contact .after15-audit/contact-mini .after15-audit/overview-mini .after15-audit/frames
 
           python3 - <<'PY'
           import json, subprocess, hashlib, base64
@@ -129,6 +129,35 @@ jobs:
               (Path(".after15-audit/contact-mini")/f"{p.stem}.b64").write_text(base64.b64encode(mini_raw).decode("ascii"))
 
               (outdir/"timestamps.json").write_text(json.dumps(timestamps,indent=2))
+
+              overview_dir=outdir/"overview"
+              overview_dir.mkdir(parents=True, exist_ok=True)
+              overview_imgs=[]
+              for oidx in range(12):
+                  frac=(oidx+0.5)/12
+                  ot=min(max(0.05,dur*frac),max(0.05,dur-0.05))
+                  o=overview_dir/f"{oidx:02d}_{ot:07.2f}s.jpg"
+                  subprocess.run([
+                      "ffmpeg","-hide_banner","-loglevel","error","-ss",f"{ot:.3f}","-i",str(p),
+                      "-frames:v","1","-vf","scale=260:-2:flags=lanczos",
+                      "-q:v","6","-y",str(o)
+                  ],check=True)
+                  overview_imgs.append(str(o))
+              overview=Path(".after15-audit/overview-mini")/f"{p.stem}.jpg"
+              subprocess.run([
+                  "montage",*overview_imgs,
+                  "-label","%t",
+                  "-tile","4x3",
+                  "-geometry","260x170+3+16",
+                  "-quality","66",
+                  "-background","#08111e",
+                  "-fill","white",
+                  "-pointsize","10",
+                  str(overview)
+              ],check=True)
+              (Path(".after15-audit/overview-mini")/f"{p.stem}.b64").write_text(
+                  base64.b64encode(overview.read_bytes()).decode("ascii")
+              )
 
           Path(".after15-audit/metadata.json").write_text(json.dumps(results,indent=2))
           PY
