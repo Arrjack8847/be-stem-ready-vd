@@ -11,7 +11,7 @@ permissions:
 
 env:
   SRC_DIR: after 15 seconds
-  OUT_DIR: who-is-bsr-audit
+  OUT_DIR: who-is-bsr-audit-dense
 
 jobs:
   audit:
@@ -30,80 +30,74 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Verify LFS binaries
+      - name: Pull scoped LFS media
         shell: bash
         run: |
           set -euo pipefail
           git lfs pull --include="after 15 seconds/*.mp4"
           mkdir -p "$OUT_DIR"
-          {
-            echo -e "file\tbytes\tstatus"
-            for f in \
-              "$SRC_DIR/20240429_IMG_4384.mp4" \
-              "$SRC_DIR/20240429_IMG_4388.mp4" \
-              "$SRC_DIR/20240430_IMG_4457-compressed.mp4" \
-              "$SRC_DIR/20240702_ENJOY AI 2024 V2-compressed.mp4"; do
-              bytes=$(stat -c%s "$f")
-              if [ "$bytes" -le 1000 ]; then status="LFS_POINTER_ONLY"; else status="ACCESSIBLE_MEDIA"; fi
-              echo -e "${f}\t${bytes}\t${status}"
-            done
-          } > "$OUT_DIR/lfs-verification.tsv"
-          cat "$OUT_DIR/lfs-verification.tsv"
 
-      - name: Record technical metadata
+      - name: Dense samples for short workshop clips
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$OUT_DIR/ffprobe"
-          for f in \
-            "$SRC_DIR/20240429_IMG_4384.mp4" \
-            "$SRC_DIR/20240429_IMG_4388.mp4" \
-            "$SRC_DIR/20240430_IMG_4457-compressed.mp4" \
-            "$SRC_DIR/20240702_ENJOY AI 2024 V2-compressed.mp4" \
-            "$SRC_DIR/20220403_PHOTO-2022-04-03-18-53-28 2.jpg" \
-            "$SRC_DIR/20230115_PHOTO-2023-01-15-10-05-51.jpg" \
-            "$SRC_DIR/20230115_PHOTO-2023-01-15-10-07-47 2.jpg"; do
-            base=$(basename "$f")
-            ffprobe -v error -show_streams -show_format -of json "$f" > "$OUT_DIR/ffprobe/${base}.json"
-          done
-
-      - name: Generate full-duration overview frames
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$OUT_DIR/frames"
-          videos=(
-            "20240429_IMG_4384.mp4"
-            "20240429_IMG_4388.mp4"
-            "20240430_IMG_4457-compressed.mp4"
-            "20240702_ENJOY AI 2024 V2-compressed.mp4"
-          )
-          percents=(0 10 20 30 40 50 60 70 80 90 98)
-          for base in "${videos[@]}"; do
-            f="$SRC_DIR/$base"
+          for base in "20240429_IMG_4384.mp4" "20240429_IMG_4388.mp4"; do
             stem="${base%.mp4}"
-            mkdir -p "$OUT_DIR/frames/$stem"
-            dur=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$f")
-            for p in "${percents[@]}"; do
-              ts=$(python3 -c "print(float('$dur')*$p/100.0)")
-              printf -v label "%03d" "$p"
-              ffmpeg -hide_banner -loglevel error -ss "$ts" -i "$f" -frames:v 1 -vf "scale='min(1280,iw)':-2" -q:v 3 "$OUT_DIR/frames/$stem/${label}pct.jpg"
+            mkdir -p "$OUT_DIR/dense/$stem"
+            dur=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$SRC_DIR/$base")
+            end=$(python3 -c "import math; print(int(math.floor(float('$dur'))))")
+            for ((s=0; s<=end; s++)); do
+              printf -v label "%03d" "$s"
+              ffmpeg -hide_banner -loglevel error -ss "$s" -i "$SRC_DIR/$base" -frames:v 1 -vf "scale='min(960,iw)':-2" -q:v 4 "$OUT_DIR/dense/$stem/${label}s.jpg"
             done
           done
 
-      - name: Copy historical photos for visual inspection
+      - name: Dense samples for long reels
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$OUT_DIR/photos"
-          cp "$SRC_DIR/20220403_PHOTO-2022-04-03-18-53-28 2.jpg" "$OUT_DIR/photos/"
-          cp "$SRC_DIR/20230115_PHOTO-2023-01-15-10-05-51.jpg" "$OUT_DIR/photos/"
-          cp "$SRC_DIR/20230115_PHOTO-2023-01-15-10-07-47 2.jpg" "$OUT_DIR/photos/"
+          for spec in "20240430_IMG_4457-compressed.mp4:10" "20240702_ENJOY AI 2024 V2-compressed.mp4:5"; do
+            base="${spec%:*}"
+            step="${spec##*:}"
+            stem="${base%.mp4}"
+            mkdir -p "$OUT_DIR/dense/$stem"
+            dur=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$SRC_DIR/$base")
+            end=$(python3 -c "import math; print(int(math.floor(float('$dur'))))")
+            for ((s=0; s<=end; s+=step)); do
+              printf -v label "%03d" "$s"
+              ffmpeg -hide_banner -loglevel error -ss "$s" -i "$SRC_DIR/$base" -frames:v 1 -vf "scale='min(960,iw)':-2" -q:v 4 "$OUT_DIR/dense/$stem/${label}s.jpg"
+            done
+          done
 
-      - name: Upload audit artifact
+      - name: ENJOY AI scene-change index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR/scenes/enjoy-ai"
+          ffmpeg -hide_banner -i "$SRC_DIR/20240702_ENJOY AI 2024 V2-compressed.mp4" \
+            -vf "select='gt(scene,0.20)',showinfo,scale=960:-2" -fps_mode vfr \
+            -q:v 4 "$OUT_DIR/scenes/enjoy-ai/scene_%03d.jpg" \
+            2> "$OUT_DIR/scenes/enjoy-ai/showinfo.log" || true
+          grep -oE 'pts_time:[0-9.]+' "$OUT_DIR/scenes/enjoy-ai/showinfo.log" | cut -d: -f2 > "$OUT_DIR/scenes/enjoy-ai/timestamps.txt" || true
+
+      - name: Target candidate windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="20240702_ENJOY AI 2024 V2-compressed.mp4"
+          mkdir -p "$OUT_DIR/target/enjoy-ai"
+          for range in "20:35" "38:55" "58:78" "80:100" "102:135" "140:160" "185:213"; do
+            start="${range%:*}"; end="${range##*:}"
+            for ((s=start; s<=end; s+=2)); do
+              printf -v label "%03d" "$s"
+              ffmpeg -hide_banner -loglevel error -ss "$s" -i "$SRC_DIR/$base" -frames:v 1 -vf "scale='min(1280,iw)':-2" -q:v 3 "$OUT_DIR/target/enjoy-ai/${label}s.jpg"
+            done
+          done
+
+      - name: Upload dense audit
         uses: actions/upload-artifact@v4
         with:
-          name: who-is-bsr-media-audit
-          path: who-is-bsr-audit
+          name: who-is-bsr-media-audit-dense
+          path: who-is-bsr-audit-dense
           if-no-files-found: error
           retention-days: 3
