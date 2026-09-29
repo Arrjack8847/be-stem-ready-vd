@@ -32,7 +32,7 @@ export const RemotionRoot: React.FC = () => (
       fps={30}
       width={1920}
       height={1080}
-      defaultProps={{withMusic: true, musicOffsetInFrames: 450, musicVolume: 0.76}}
+      defaultProps={{withMusic: true, withSfx: true, musicOffsetInFrames: 450, musicVolume: 0.76}}
     />
 
     <Composition
@@ -42,7 +42,17 @@ export const RemotionRoot: React.FC = () => (
       fps={30}
       width={1920}
       height={1080}
-      defaultProps={{withMusic: false, musicOffsetInFrames: 450, musicVolume: 0.76}}
+      defaultProps={{withMusic: false, withSfx: false, musicOffsetInFrames: 450, musicVolume: 0.76}}
+    />
+
+    <Composition
+      id="WhoIsBSR-MusicOnly"
+      component={WhoIsBSRScene}
+      durationInFrames={630}
+      fps={30}
+      width={1920}
+      height={1080}
+      defaultProps={{withMusic: true, withSfx: false, musicOffsetInFrames: 450, musicVolume: 0.76}}
     />
   </>
 );

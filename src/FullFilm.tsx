@@ -19,7 +19,12 @@ export const FullFilm: React.FC = () => (
       from={HOOK_DURATION}
       durationInFrames={VIDEO.duration}
     >
-      <WhoIsBSRScene withMusic={false} musicOffsetInFrames={HOOK_DURATION} musicVolume={0.76} />
+      <WhoIsBSRScene
+        withMusic={false}
+        withSfx
+        musicOffsetInFrames={HOOK_DURATION}
+        musicVolume={0.76}
+      />
     </Sequence>
 
     <Audio
