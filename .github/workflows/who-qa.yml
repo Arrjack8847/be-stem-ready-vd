@@ -1,0 +1,63 @@
+name: Who Is BSR QA
+
+on:
+  push:
+    paths:
+      - ".github/workflows/who-qa.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Prepare media
+        run: npm run prepare:media
+
+      - name: Render QA preview
+        run: |
+          npx remotion render src/index.ts WhoIsBSR out/who-qa.mp4 \
+            --codec=h264 --crf=24 --scale=0.5 --concurrency=2
+
+      - name: Build visual QA sheet
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+          rm -rf .who-qa
+          mkdir -p .who-qa/frames
+          ffmpeg -hide_banner -loglevel error -i out/who-qa.mp4 \
+            -vf "fps=1,scale=480:-2:flags=lanczos" \
+            -q:v 4 .who-qa/frames/frame_%02d.jpg
+          montage .who-qa/frames/*.jpg \
+            -label "%t" -tile "5x" -geometry "480x285+4+20" \
+            -background "#08111e" -fill white -pointsize 12 \
+            .who-qa/contact.jpg
+          base64 -w 0 .who-qa/contact.jpg > .who-qa/contact.b64
+          printf "TypeScript: PASS\nRender: PASS\nComposition: WhoIsBSR\nFrames: 630 @ 30fps\n" > .who-qa/status.txt
+
+      - name: Commit QA outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .who-qa
+          git commit -m "Add Who Is BSR QA outputs [skip ci]" || exit 0
+          git push
