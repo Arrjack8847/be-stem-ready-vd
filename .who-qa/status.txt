@@ -1,4 +1,0 @@
-TypeScript: PASS
-Render: PASS
-Composition: WhoIsBSR
-Frames: 630 @ 30fps
