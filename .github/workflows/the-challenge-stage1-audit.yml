@@ -88,6 +88,29 @@ jobs:
             ffmpeg -hide_banner -loglevel error -i "$f" -vf "fps=1/5,scale=480:270,tile=4x3:padding=4:margin=4" -vsync 0 -q:v 3 "audit/contact-sheets/${stem}_dense_%03d.jpg"
           done
 
+      - name: Create targeted dense candidate sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit/candidate-sheets
+
+          make_sheets () {
+            file="$1"
+            start="$2"
+            length="$3"
+            label="$4"
+            ffmpeg -hide_banner -loglevel error -ss "$start" -t "$length" -i "$file" -vf "fps=1,scale=480:270,tile=5x4:padding=4:margin=4" -vsync 0 -q:v 2 "audit/candidate-sheets/${label}_%02d.jpg"
+          }
+
+          make_sheets "after 35seonds/20260808_IMG_7449-compressed.mp4" 0 30 "drone_000_030"
+          make_sheets "after 35seonds/20260808_IMG_7449-compressed.mp4" 30 30 "drone_030_060"
+          make_sheets "after 35seonds/20260808_IMG_7449-compressed.mp4" 60 28 "drone_060_088"
+
+          make_sheets "after 35seonds/20240427_115807_WA_e898bd84-ac7a-46d5-904e-5016986d5e1e-compressed.mp4" 55 35 "educator_055_090"
+          make_sheets "after 35seonds/20240427_115807_WA_e898bd84-ac7a-46d5-904e-5016986d5e1e-compressed.mp4" 115 40 "educator_115_155"
+
+          make_sheets "after 35seonds/20200103_ENJOY AI2019 FINAL-compressed.mp4" 15 45 "ai2019_015_060"
+
       - name: Upload Stage 1 audit
         uses: actions/upload-artifact@v4
         with:
