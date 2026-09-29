@@ -134,8 +134,8 @@ jobs:
               overview_dir.mkdir(parents=True, exist_ok=True)
               overview_imgs=[]
               for oidx in range(12):
-                  frac=(oidx+0.5)/12
-                  ot=min(max(0.05,dur*frac),max(0.05,dur-0.05))
+                  overview_frac=(oidx+0.5)/12
+                  ot=min(max(0.05,dur*overview_frac),max(0.05,dur-0.05))
                   o=overview_dir/f"{oidx:02d}_{ot:07.2f}s.jpg"
                   subprocess.run([
                       "ffmpeg","-hide_banner","-loglevel","error","-ss",f"{ot:.3f}","-i",str(p),
