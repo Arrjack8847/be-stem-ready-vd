@@ -6,6 +6,12 @@ import {WHO_SOURCES, WHO_TRIMS} from './whoConfig';
 
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 
+// @remotion/media resolves media time against the parent scene frame.
+// For clips placed later inside this scene, subtract the internal Sequence start
+// so the visible first frame still lands on the exact approved source action point.
+const trimForInternalSequence = (sourceStartFrame: number, sequenceFrom: number) =>
+  sourceStartFrame - sequenceFrom;
+
 export const HandsOnScene: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
   const supportOpacity = interpolate(frame, [45, 53], [0, 1], clamp);
@@ -23,7 +29,7 @@ export const HandsOnScene: React.FC<{duration: number}> = ({duration}) => {
         <CinematicVideo
           src={WHO_SOURCES.enjoyAI}
           duration={35}
-          trimBefore={WHO_TRIMS.handsRobot}
+          trimBefore={trimForInternalSequence(WHO_TRIMS.handsRobot, 0)}
           scaleFrom={1.015}
           scaleTo={1.035}
           objectPosition="50% 50%"
@@ -36,7 +42,7 @@ export const HandsOnScene: React.FC<{duration: number}> = ({duration}) => {
         <CinematicVideo
           src={WHO_SOURCES.enjoyAI}
           duration={25}
-          trimBefore={WHO_TRIMS.handsCoding}
+          trimBefore={trimForInternalSequence(WHO_TRIMS.handsCoding, 35)}
           scaleFrom={1.01}
           scaleTo={1.025}
           objectPosition="48% 50%"
@@ -49,7 +55,7 @@ export const HandsOnScene: React.FC<{duration: number}> = ({duration}) => {
         <CinematicVideo
           src={WHO_SOURCES.enjoyAI}
           duration={30}
-          trimBefore={WHO_TRIMS.handsDrone}
+          trimBefore={trimForInternalSequence(WHO_TRIMS.handsDrone, 60)}
           scaleFrom={1.0}
           scaleTo={1.018}
           objectPosition="50% 50%"
