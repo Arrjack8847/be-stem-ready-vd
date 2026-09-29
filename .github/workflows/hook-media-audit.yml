@@ -151,10 +151,22 @@ jobs:
                   f.write(f"{s['filename']}\t{s['display_width']}x{s['display_height']}\t{s['avg_fps']}\t{s['duration_seconds']}\t{s['codec']}\t{s['orientation']}\t{s['size_mb']}\t{s['audio']}\t{s['quality']}\t{s['sha256']}\n")
           PY
 
+      - name: Create edit-friendly proxy only for heavy 4K HEVC source
+        run: |
+          mkdir -p "public/media/hook/04-competition/_proxy"
+          ffmpeg -hide_banner -loglevel error -y \
+            -i "2-first 15 seconds/video_20260912_092254.mp4" \
+            -vf "scale=1920:1080:flags=lanczos" \
+            -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p \
+            -r 60 -fps_mode cfr \
+            -c:a aac -b:a 192k -movflags +faststart \
+            "public/media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4"
+
       - name: Commit audit outputs
         run: |
+          git lfs install --local
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .media-audit
-          git commit -m "Add hook media audit outputs [skip ci]" || exit 0
+          git add .media-audit "public/media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4"
+          git commit -m "Add hook media audit and competition proxy [skip ci]" || exit 0
           git push
