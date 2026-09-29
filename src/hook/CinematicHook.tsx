@@ -16,6 +16,7 @@ import {
   HOOK_CUTS,
   HOOK_DURATION,
   HOOK_SOURCES,
+  HOOK_TRIMS,
 } from './hookConfig';
 
 export {HOOK_DURATION} from './hookConfig';
@@ -26,8 +27,8 @@ const TechMarker: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
   const opacity = interpolate(
     frame,
-    [5, 13, duration - 10, duration - 1],
-    [0, 0.42, 0.42, 0],
+    [18, 24, 36, 43],
+    [0, 0.38, 0.38, 0],
     {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
@@ -39,23 +40,23 @@ const TechMarker: React.FC<{duration: number}> = ({duration}) => {
       <div
         style={{
           position: 'absolute',
-          right: 154,
-          top: 194,
-          width: 126,
-          height: 76,
-          borderTop: '1px solid rgba(114,228,245,.78)',
-          borderRight: '1px solid rgba(114,228,245,.78)',
+          right: 150,
+          top: 188,
+          width: 112,
+          height: 66,
+          borderTop: '1px solid rgba(114,228,245,.74)',
+          borderRight: '1px solid rgba(114,228,245,.74)',
         }}
       />
       <div
         style={{
           position: 'absolute',
-          right: 153,
-          top: 283,
+          right: 149,
+          top: 269,
           fontFamily: 'Inter',
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: 500,
-          letterSpacing: 2.4,
+          letterSpacing: 2.1,
           color: '#72e4f5',
         }}
       >
@@ -77,153 +78,153 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
     <Fonts />
 
     <Sequence
-      name="01 · Technology impact"
+      name="01 · Technology impact · macro"
       from={HOOK_CUTS.techStart}
-      durationInFrames={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.handsStart)}
+      durationInFrames={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.buildStart)}
     >
       <HookShot
         src={HOOK_SOURCES.tech}
-        type="image"
-        duration={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.handsStart)}
-        scaleFrom={1.04}
-        scaleTo={1.09}
-        translateXFrom={-10}
+        duration={durationBetween(HOOK_CUTS.techStart, HOOK_CUTS.buildStart)}
+        trimBefore={HOOK_TRIMS.tech}
+        speedCurve={{from: 1.18, to: 0.88}}
+        scaleFrom={1.11}
+        scaleTo={1.17}
+        translateXFrom={-12}
         translateXTo={4}
-        objectPosition="50% 48%"
-        filter="contrast(1.13) saturate(1.04) brightness(.91)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.22), rgba(3,10,22,.015) 58%, rgba(3,10,22,.07))"
+        objectPosition="52% 54%"
+        filter="contrast(1.16) saturate(.98) brightness(.89)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.21), rgba(3,10,22,.01) 60%, rgba(3,10,22,.06))"
       />
     </Sequence>
 
     <Sequence
-      name="02 · Hands / building"
-      from={HOOK_CUTS.handsStart}
-      durationInFrames={durationBetween(HOOK_CUTS.handsStart, HOOK_CUTS.humanStart)}
+      name="02 · Student building · close"
+      from={HOOK_CUTS.buildStart}
+      durationInFrames={durationBetween(HOOK_CUTS.buildStart, HOOK_CUTS.humanStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.learning}
-        type="image"
-        duration={durationBetween(HOOK_CUTS.handsStart, HOOK_CUTS.humanStart)}
-        scaleFrom={1.115}
-        scaleTo={1.16}
-        translateXFrom={-7}
-        translateXTo={4}
-        objectPosition="52% 62%"
-        filter="contrast(1.08) saturate(1.02) brightness(.95)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.18), rgba(3,10,22,.01) 64%, rgba(3,10,22,.05))"
+        src={HOOK_SOURCES.build}
+        duration={durationBetween(HOOK_CUTS.buildStart, HOOK_CUTS.humanStart)}
+        trimBefore={HOOK_TRIMS.build}
+        rotation={-90}
+        scaleFrom={1.025}
+        scaleTo={1.065}
+        translateXFrom={8}
+        translateXTo={-4}
+        objectPosition="50% 50%"
+        filter="contrast(1.08) saturate(1.00) brightness(.95)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.13), transparent 68%, rgba(3,10,22,.025))"
       />
     </Sequence>
 
     <Sequence
-      name="03 · Human concentration"
+      name="03 · Human connection · face"
       from={HOOK_CUTS.humanStart}
       durationInFrames={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
     >
       <HookShot
         src={HOOK_SOURCES.human}
-        type="image"
         duration={durationBetween(HOOK_CUTS.humanStart, HOOK_CUTS.competitionStart)}
-        scaleFrom={1.06}
-        scaleTo={1.085}
-        translateXFrom={18}
-        translateXTo={4}
-        objectPosition="48% 43%"
-        filter="contrast(1.07) saturate(.99) brightness(.94)"
-        overlay="linear-gradient(90deg, rgba(3,10,22,.03), transparent 50%, rgba(3,10,22,.09)), linear-gradient(0deg, rgba(3,10,22,.16), transparent 58%)"
+        trimBefore={HOOK_TRIMS.human}
+        rotation={-90}
+        scaleFrom={1.16}
+        scaleTo={1.165}
+        translateXFrom={-38}
+        translateXTo={-34}
+        filter="contrast(1.04) saturate(.98) brightness(.97)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.10), transparent 68%)"
       />
     </Sequence>
 
     <Sequence
-      name="04 · Competition scale"
+      name="04 · Competition energy · wide"
       from={HOOK_CUTS.competitionStart}
       durationInFrames={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
     >
       <HookShot
         src={HOOK_SOURCES.competition}
-        type="image"
         duration={durationBetween(HOOK_CUTS.competitionStart, HOOK_CUTS.achievementStart)}
-        scaleFrom={1.01}
-        scaleTo={1.045}
-        translateXFrom={8}
-        translateXTo={-8}
-        objectPosition="50% 48%"
-        filter="contrast(1.10) saturate(1.02) brightness(.95)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.14), transparent 62%, rgba(3,10,22,.045))"
+        trimBefore={HOOK_TRIMS.competition}
+        scaleFrom={1.02}
+        scaleTo={1.05}
+        translateXFrom={0}
+        translateXTo={-5}
+        filter="contrast(1.08) saturate(1.01) brightness(.96)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 72%)"
       />
     </Sequence>
 
     <Sequence
-      name="05 · Achievement"
+      name="05 · Achievement · emotional medium"
       from={HOOK_CUTS.achievementStart}
-      durationInFrames={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.venueStart)}
+      durationInFrames={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.scaleStart)}
     >
       <HookShot
         src={HOOK_SOURCES.achievement}
-        type="image"
-        duration={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.venueStart)}
-        scaleFrom={1.02}
-        scaleTo={1.06}
-        translateYFrom={4}
-        translateYTo={-5}
-        objectPosition="51% 48%"
-        filter="contrast(1.09) saturate(1.04) brightness(.94)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.16), transparent 64%, rgba(3,10,22,.035))"
+        duration={durationBetween(HOOK_CUTS.achievementStart, HOOK_CUTS.scaleStart)}
+        trimBefore={HOOK_TRIMS.achievement}
+        playbackRate={1}
+        scaleFrom={1.04}
+        scaleTo={1.07}
+        translateYFrom={3}
+        translateYTo={-3}
+        filter="contrast(1.07) saturate(1.035) brightness(.98) sepia(.025)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.11), transparent 70%)"
       />
     </Sequence>
 
     <Sequence
-      name="06 · Scale reveal"
-      from={HOOK_CUTS.venueStart}
-      durationInFrames={durationBetween(HOOK_CUTS.venueStart, HOOK_CUTS.heroTechStart)}
+      name="06 · Scale reveal · extreme wide"
+      from={HOOK_CUTS.scaleStart}
+      durationInFrames={durationBetween(HOOK_CUTS.scaleStart, HOOK_CUTS.heroStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.venue}
-        type="image"
-        duration={durationBetween(HOOK_CUTS.venueStart, HOOK_CUTS.heroTechStart)}
+        src={HOOK_SOURCES.scale}
+        duration={durationBetween(HOOK_CUTS.scaleStart, HOOK_CUTS.heroStart)}
+        trimBefore={HOOK_TRIMS.scale}
+        playbackRate={0.96}
         scaleFrom={1.0}
-        scaleTo={1.03}
-        translateXFrom={-5}
-        translateXTo={5}
-        objectPosition="50% 50%"
-        filter="contrast(1.11) saturate(1.025) brightness(.92)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.15), transparent 62%, rgba(3,10,22,.05))"
+        scaleTo={1.012}
+        filter="contrast(1.055) saturate(.98) brightness(.98)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.07), transparent 78%)"
       />
     </Sequence>
 
     <Sequence
-      name="07 · Technology hero"
-      from={HOOK_CUTS.heroTechStart}
-      durationInFrames={durationBetween(HOOK_CUTS.heroTechStart, HOOK_CUTS.brandStart)}
+      name="07 · Future technology · hero close"
+      from={HOOK_CUTS.heroStart}
+      durationInFrames={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)}
     >
       <HookShot
-        src={HOOK_SOURCES.heroTech}
-        type="image"
-        duration={durationBetween(HOOK_CUTS.heroTechStart, HOOK_CUTS.brandStart)}
-        scaleFrom={1.045}
-        scaleTo={1.095}
-        translateXFrom={5}
+        src={HOOK_SOURCES.hero}
+        duration={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)}
+        trimBefore={HOOK_TRIMS.hero}
+        speedCurve={{from: 1.07, to: 0.95}}
+        scaleFrom={1.09}
+        scaleTo={1.145}
+        translateXFrom={8}
         translateXTo={-5}
-        objectPosition="50% 48%"
-        filter="contrast(1.16) saturate(1.055) brightness(.89)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.22), rgba(3,10,22,.015) 58%, rgba(3,10,22,.07))"
+        objectPosition="54% 54%"
+        filter="contrast(1.14) saturate(1.03) brightness(.91)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.18), rgba(3,10,22,.01) 62%, rgba(3,10,22,.045))"
       />
-      <TechMarker duration={durationBetween(HOOK_CUTS.heroTechStart, HOOK_CUTS.brandStart)} />
+      <TechMarker duration={durationBetween(HOOK_CUTS.heroStart, HOOK_CUTS.brandStart)} />
     </Sequence>
 
     <Sequence
-      name="08 · Brand reveal"
+      name="08 · Be STEM Ready · brand"
       from={HOOK_CUTS.brandStart}
       durationInFrames={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)}
     >
       <HookShot
-        src={HOOK_SOURCES.group}
-        type="image"
+        src={HOOK_SOURCES.brand}
         duration={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)}
+        trimBefore={HOOK_TRIMS.brand}
         scaleFrom={1.018}
-        scaleTo={1.045}
-        objectPosition="50% 47%"
-        filter="contrast(1.08) saturate(1.00) brightness(.83)"
-        overlay="linear-gradient(0deg, rgba(3,10,22,.28), rgba(3,10,22,.02) 62%)"
+        scaleTo={1.025}
+        objectPosition="50% 48%"
+        filter="contrast(1.08) saturate(.99) brightness(.88)"
+        overlay="linear-gradient(0deg, rgba(3,10,22,.17), rgba(3,10,22,.015) 66%)"
       />
       <BrandReveal duration={durationBetween(HOOK_CUTS.brandStart, HOOK_CUTS.end)} />
     </Sequence>
@@ -232,7 +233,7 @@ export const CinematicHook: React.FC<{withMusic?: boolean}> = ({withMusic = fals
       style={{
         pointerEvents: 'none',
         background:
-          'radial-gradient(circle at 50% 48%, transparent 50%, rgba(2,7,16,.11) 100%)',
+          'radial-gradient(circle at 50% 48%, transparent 53%, rgba(2,7,16,.09) 100%)',
       }}
     />
 

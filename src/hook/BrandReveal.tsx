@@ -9,18 +9,20 @@ const clamp = {
 export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
 
-  const shade = interpolate(frame, [0, 12, duration - 1], [0.10, 0.42, 0.58], clamp);
-  const opacity = interpolate(frame, [8, 18], [0, 1], clamp);
-  const y = interpolate(frame, [8, 20], [18, 0], clamp);
-  const subOpacity = interpolate(frame, [15, 27], [0, 1], clamp);
+  const shade = interpolate(frame, [0, 10, duration - 1], [0.08, 0.32, 0.46], clamp);
+  const opacity = interpolate(frame, [14, 23], [0, 1], clamp);
+  const y = interpolate(frame, [14, 24], [18, 0], clamp);
+  const tracking = interpolate(frame, [14, 28], [1.2, -2.0], clamp);
+  const subOpacity = interpolate(frame, [21, 31], [0, 1], clamp);
 
   return (
     <AbsoluteFill>
       <AbsoluteFill
         style={{
-          background: `linear-gradient(0deg, rgba(3,10,22,${shade}), rgba(3,10,22,.10) 62%, rgba(3,10,22,.06))`,
+          background: `linear-gradient(0deg, rgba(3,10,22,${shade}), rgba(3,10,22,.08) 62%, rgba(3,10,22,.025))`,
         }}
       />
+
       <div
         style={{
           position: 'absolute',
@@ -40,27 +42,29 @@ export const BrandReveal: React.FC<{duration: number}> = ({duration}) => {
             marginBottom: 18,
           }}
         />
+
         <div
           style={{
             fontSize: 76,
             lineHeight: 0.98,
             fontWeight: 700,
-            letterSpacing: -2.2,
+            letterSpacing: tracking,
           }}
         >
           BE STEM READY
         </div>
+
         <div
           style={{
             marginTop: 15,
             fontFamily: 'Inter',
-            fontSize: 24,
+            fontSize: 23,
             fontWeight: 500,
-            letterSpacing: 3.6,
+            letterSpacing: 3.2,
             opacity: subOpacity,
           }}
         >
-          BUILDING FUTURE-READY MINDS
+          STEM EDUCATION CANNOT WAIT.
         </div>
       </div>
     </AbsoluteFill>

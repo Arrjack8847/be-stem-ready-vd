@@ -1,12 +1,98 @@
-import {mkdir, writeFile} from 'node:fs/promises';
+import {copyFile, mkdir, readFile, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
-const destinationDir = path.join(root, 'public', 'hook');
-const sfxDir = path.join(destinationDir, 'sfx');
+const generatedHookDir = path.join(root, 'public', 'hook');
+const sfxDir = path.join(generatedHookDir, 'sfx');
 
-await mkdir(destinationDir, {recursive: true});
+await mkdir(generatedHookDir, {recursive: true});
 await mkdir(sfxDir, {recursive: true});
+
+const workingCopies = [
+  {
+    source: '2-first 15 seconds/A001_09130851_C186.mp4',
+    destination: 'public/media/hook/01-tech/01-tech-primary.mp4',
+  },
+  {
+    source: '2-first 15 seconds/A001_09130902_C200.mp4',
+    destination: 'public/media/hook/02-build/02-build-primary.mp4',
+  },
+  {
+    source: '2-first 15 seconds/A001_09121022_C081.mp4',
+    destination: 'public/media/hook/03-human/03-human-primary.mp4',
+  },
+  {
+    source: '2-first 15 seconds/A001_09131545_C300.mp4',
+    destination: 'public/media/hook/05-achievement/05-achievement-primary.mp4',
+  },
+  {
+    source: '2-first 15 seconds/DJI_20260912091037_0058_D-compressed-compressed.mp4',
+    destination: 'public/media/hook/06-scale/06-scale-primary.mp4',
+  },
+  {
+    source: '2-first 15 seconds/20260720_IMG_7276.mp4',
+    destination: 'public/media/hook/08-brand/08-brand-primary.mp4',
+  },
+];
+
+const exists = async (file) => {
+  try {
+    return await stat(file);
+  } catch {
+    return null;
+  }
+};
+
+const assertRealMedia = async (source, sourceStat) => {
+  if (sourceStat.size >= 1024) {
+    return;
+  }
+
+  const header = await readFile(source, 'utf8').catch(() => '');
+  if (header.startsWith('version https://git-lfs.github.com/spec/v1')) {
+    throw new Error(
+      `${path.basename(source)} is still a Git LFS pointer. Run "git lfs pull" before starting Remotion.`,
+    );
+  }
+};
+
+for (const item of workingCopies) {
+  const source = path.join(root, item.source);
+  const destination = path.join(root, item.destination);
+
+  const sourceStat = await exists(source);
+  if (!sourceStat) {
+    throw new Error(`Missing hook source: ${source}`);
+  }
+
+  await assertRealMedia(source, sourceStat);
+  await mkdir(path.dirname(destination), {recursive: true});
+
+  const destinationStat = await exists(destination);
+  if (destinationStat?.size === sourceStat.size) {
+    continue;
+  }
+
+  await copyFile(source, destination);
+  console.log(`Prepared non-destructive hook working copy: ${item.destination}`);
+}
+
+// The 4K HEVC competition master has one committed 1080p H.264 proxy.
+// Ensure Git LFS has materialized it before Remotion starts.
+const competitionProxy = path.join(
+  root,
+  'public',
+  'media',
+  'hook',
+  '04-competition',
+  '_proxy',
+  '04-competition-primary-proxy.mp4',
+);
+const proxyStat = await exists(competitionProxy);
+if (!proxyStat) {
+  throw new Error('Missing competition proxy. Run "git lfs pull" and try again.');
+}
+await assertRealMedia(competitionProxy, proxyStat);
 
 const sampleRate = 24000;
 
@@ -60,12 +146,13 @@ const scaleWhoosh = () => {
   const noise = makeNoise(0x5ca1e001);
   let smoothed = 0;
   let phase = 0;
+
   return Array.from({length}, (_, index) => {
     const progress = index / Math.max(1, length - 1);
     smoothed += (noise() - smoothed) / 7;
     const envelope = Math.pow(Math.sin(Math.PI * progress), 1.7);
     const frequency = 190 + 420 * progress;
-    phase += 2 * Math.PI * frequency / sampleRate;
+    phase += (2 * Math.PI * frequency) / sampleRate;
     return (smoothed * 0.36 + Math.sin(phase) * 0.035) * envelope;
   });
 };
@@ -90,5 +177,4 @@ for (const [filename, samples] of generatedSfx) {
   const destination = path.join(sfxDir, filename);
   const buffer = wavBuffer(samples);
   await writeFile(destination, buffer);
-  console.log(`Prepared hook SFX: ${filename}`);
 }

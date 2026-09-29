@@ -3,6 +3,7 @@ export const hookAssets = {
     role: 'TECH',
     source: '2-first 15 seconds/A001_09130851_C186.mp4',
     workingName: '01-tech-primary.mp4',
+    workingPath: 'media/hook/01-tech/01-tech-primary.mp4',
     candidateRange: {startSeconds: 0.1, endSeconds: 4.6},
     encodedResolution: '1280x720',
     displayResolution: '1280x720',
@@ -15,17 +16,13 @@ export const hookAssets = {
     sizeMB: 5.89,
     audio: true,
     quality: 'minimum-usable',
-    status: 'candidate-primary',
-    notes: [
-      'Spherical protective-cage drone/technology movement is visible immediately.',
-      'Average frame rate is ~20 fps while nominal rate is 30 fps; inspect cadence before final conform.',
-    ],
+    status: 'approved-primary',
   },
-
   build: {
     role: 'BUILD',
     source: '2-first 15 seconds/A001_09130902_C200.mp4',
     workingName: '02-build-primary.mp4',
+    workingPath: 'media/hook/02-build/02-build-primary.mp4',
     candidateRange: {startSeconds: 0.1, endSeconds: 5.6},
     encodedResolution: '1072x1920',
     displayResolutionAfterCorrection: '1920x1072',
@@ -38,17 +35,13 @@ export const hookAssets = {
     sizeMB: 12.56,
     audio: true,
     quality: 'good-after-rotation',
-    status: 'candidate-primary',
-    notes: [
-      'Students actively working around laptops with visible hands, concentration and interaction.',
-      'The MP4 has no rotation flag even though the visual content is sideways; correct orientation non-destructively during conform.',
-    ],
+    status: 'approved-primary',
   },
-
   human: {
     role: 'HUMAN',
     source: '2-first 15 seconds/A001_09121022_C081.mp4',
     workingName: '03-human-primary.mp4',
+    workingPath: 'media/hook/03-human/03-human-primary.mp4',
     candidateRange: {startSeconds: 11.5, endSeconds: 14.8},
     encodedResolution: '1072x1920',
     displayResolutionAfterCorrection: '1920x1072',
@@ -61,18 +54,14 @@ export const hookAssets = {
     sizeMB: 12.43,
     audio: true,
     quality: 'good-after-rotation',
-    status: 'candidate-primary',
-    notes: [
-      'Late section contains the clearest student gestures/reaction beside an active robot field.',
-      'Use only after non-destructive orientation correction.',
-    ],
+    status: 'approved-primary',
   },
-
   competition: {
     role: 'COMPETITION',
     source: '2-first 15 seconds/video_20260912_092254.mp4',
     workingName: '04-competition-primary.mp4',
     proxy: 'public/media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4',
+    proxyPublicPath: 'media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4',
     candidateRange: {startSeconds: 0.1, endSeconds: 3.3},
     resolution: '3840x2160',
     avgFps: 59.6934,
@@ -84,17 +73,13 @@ export const hookAssets = {
     sizeMB: 86.2,
     audio: true,
     quality: 'preferred-master',
-    status: 'candidate-primary',
-    notes: [
-      'Strong live competition floor with students and multiple robots visible.',
-      '4K HEVC at ~73 Mbps is decode-heavy, so a 1080p H.264 60 fps CFR proxy was created for editing only.',
-    ],
+    status: 'approved-primary',
   },
-
   achievement: {
     role: 'ACHIEVEMENT',
     source: '2-first 15 seconds/A001_09131545_C300.mp4',
     workingName: '05-achievement-primary.mp4',
+    workingPath: 'media/hook/05-achievement/05-achievement-primary.mp4',
     candidateRange: {startSeconds: 4.1, endSeconds: 10.6},
     encodedResolution: '1280x720',
     displayResolution: '1280x720',
@@ -107,18 +92,13 @@ export const hookAssets = {
     sizeMB: 6.31,
     audio: true,
     quality: 'minimum-usable',
-    status: 'candidate-primary',
-    notes: [
-      'Contains real award-stage movement: approach, handoff and students holding certificates.',
-      'The stronger named award videos are not present; this is the best achievement footage currently available.',
-      'Average frame rate is ~20 fps while nominal rate is 30 fps; inspect cadence before final conform.',
-    ],
+    status: 'approved-primary',
   },
-
   scale: {
     role: 'SCALE',
     source: '2-first 15 seconds/DJI_20260912091037_0058_D-compressed-compressed.mp4',
     workingName: '06-scale-primary.mp4',
+    workingPath: 'media/hook/06-scale/06-scale-primary.mp4',
     candidateRange: {startSeconds: 0.1, endSeconds: 15.1},
     resolution: '1920x1080',
     avgFps: 59.9401,
@@ -130,18 +110,14 @@ export const hookAssets = {
     sizeMB: 93.14,
     audio: false,
     quality: 'preferred',
-    status: 'candidate-primary',
-    notes: [
-      'Clean high/wide venue pass with visible crowd, competition fields and stage.',
-      'A second usable wide window exists around 90-100 seconds.',
-    ],
+    status: 'approved-primary',
   },
-
   hero: {
     role: 'HERO',
     source: '2-first 15 seconds/video_20260912_092254.mp4',
     workingName: '07-hero-primary.mp4',
     proxy: 'public/media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4',
+    proxyPublicPath: 'media/hook/04-competition/_proxy/04-competition-primary-proxy.mp4',
     candidateRange: {startSeconds: 3.6, endSeconds: 6.6},
     resolution: '3840x2160',
     avgFps: 59.6934,
@@ -153,17 +129,13 @@ export const hookAssets = {
     sizeMB: 86.2,
     audio: true,
     quality: 'preferred-master',
-    status: 'candidate-primary',
-    notes: [
-      'The camera closes in on the active competition robot, producing the strongest technology close-up in the uploaded set.',
-      'Reuse the competition proxy for preview; do not create a duplicate hero proxy.',
-    ],
+    status: 'approved-primary',
   },
-
   brand: {
     role: 'BRAND',
     source: '2-first 15 seconds/20260720_IMG_7276.mp4',
     workingName: '08-brand-primary.mp4',
+    workingPath: 'media/hook/08-brand/08-brand-primary.mp4',
     candidateRange: {startSeconds: 5.5, endSeconds: 12.5},
     resolution: '1920x1072',
     avgFps: 29.9429,
@@ -175,11 +147,7 @@ export const hookAssets = {
     sizeMB: 14.08,
     audio: true,
     quality: 'good',
-    status: 'candidate-primary',
-    notes: [
-      'Stable technology demonstration with strong future/credibility feeling.',
-      'The sampled frames do not show a dominant Be STEM Ready logo, so the existing group image remains the stronger visual backup for the eventual brand reveal.',
-    ],
+    status: 'approved-primary',
   },
 } as const;
 
@@ -221,8 +189,8 @@ export const hookBackups = {
   scale: [
     {
       source: '2-first 15 seconds/DJI_20260912091037_0058_D-compressed-compressed.mp4',
-      candidateRange: {startSeconds: 90.0, endSeconds: 100.0},
-      note: 'Alternative high/wide venue pass from the opposite portion of the same source.',
+      candidateRange: {startSeconds: 90, endSeconds: 100},
+      note: 'Alternative high/wide venue pass from later in the same source.',
     },
   ],
   hero: [
