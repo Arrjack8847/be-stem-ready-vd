@@ -41,12 +41,24 @@ export const hookMusicVolume = (frame: number) => {
   }
 
   const opening = dip(frame, 1, 8, 0.82);
-  const competition = dip(frame, HOOK_CUTS.competitionStart + 3, 10, 0.88);
+  const techBuild = dip(frame, HOOK_CUTS.buildStart, 7, 0.93);
+  const competition = dip(frame, HOOK_CUTS.competitionStart + 2, 10, 0.86);
   const achievement = dip(frame, HOOK_CUTS.achievementStart + 5, 10, 0.88);
   const scale = dip(frame, HOOK_CUTS.scaleStart, 14, 0.80);
-  const brand = dip(frame, HOOK_CUTS.brandStart + 6, 12, 0.82);
+  const future = dip(frame, HOOK_CUTS.heroStart, 9, 0.88);
+  const brand = dip(frame, HOOK_CUTS.brandStart + 5, 12, 0.80);
 
-  let level = base * Math.min(opening, competition, achievement, scale, brand);
+  let level =
+    base *
+    Math.min(
+      opening,
+      techBuild,
+      competition,
+      achievement,
+      scale,
+      future,
+      brand,
+    );
 
   // Let the completed identity breathe, then restore the normal film level
   // before the 00:15 identity chapter begins.
@@ -75,6 +87,18 @@ export const HookSoundDesign: React.FC = () => (
     </Sequence>
 
     <Sequence
+      name="SFX · tech to build directional"
+      from={HOOK_CUTS.buildStart - 4}
+      durationInFrames={10}
+    >
+      <Audio
+        src={staticFile(HOOK_SFX.scaleWhoosh)}
+        playbackRate={2}
+        volume={(frame) => envelope(frame, 2, 5, 9, 0.026)}
+      />
+    </Sequence>
+
+    <Sequence
       name="Natural detail · build"
       from={HOOK_CUTS.buildStart}
       durationInFrames={HOOK_CUTS.humanStart - HOOK_CUTS.buildStart}
@@ -84,6 +108,14 @@ export const HookSoundDesign: React.FC = () => (
         trimBefore={HOOK_TRIMS.build}
         volume={(frame) => envelope(frame, 5, 24, 40, 0.025)}
       />
+    </Sequence>
+
+    <Sequence
+      name="SFX · human to competition impact"
+      from={HOOK_CUTS.competitionStart - 1}
+      durationInFrames={10}
+    >
+      <Audio src={staticFile(HOOK_SFX.impact)} volume={0.092} />
     </Sequence>
 
     <Sequence
@@ -140,6 +172,42 @@ export const HookSoundDesign: React.FC = () => (
       durationInFrames={10}
     >
       <Audio src={staticFile(HOOK_SFX.impact)} volume={0.075} />
+    </Sequence>
+
+    <Sequence
+      name="SFX · scale to future swipe"
+      from={HOOK_CUTS.heroStart - 3}
+      durationInFrames={11}
+    >
+      <Audio
+        src={staticFile(HOOK_SFX.scaleWhoosh)}
+        playbackRate={1.85}
+        volume={(frame) => envelope(frame, 2, 6, 10, 0.052)}
+      />
+    </Sequence>
+
+    <Sequence
+      name="SFX · future mechanical accent"
+      from={HOOK_CUTS.heroStart + 4}
+      durationInFrames={16}
+    >
+      <Audio
+        src={staticFile(HOOK_SFX.mechanical)}
+        playbackRate={1.05}
+        volume={(frame) => envelope(frame, 3, 9, 15, 0.045)}
+      />
+    </Sequence>
+
+    <Sequence
+      name="SFX · future to brand riser"
+      from={HOOK_CUTS.brandStart - 11}
+      durationInFrames={18}
+    >
+      <Audio
+        src={staticFile(HOOK_SFX.scaleRiser)}
+        playbackRate={1.15}
+        volume={(frame) => envelope(frame, 3, 12, 17, 0.048)}
+      />
     </Sequence>
 
     <Sequence
