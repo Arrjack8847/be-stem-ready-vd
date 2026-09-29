@@ -5,19 +5,30 @@ import {COLORS} from '../assets';
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 
 const markerX = [430, 960, 1490] as const;
+const YEAR_2023_START = 60;
+const YEAR_2024_START = 159;
 
 export const HistoryTimeline: React.FC<{duration: number}> = ({duration}) => {
   const frame = useCurrentFrame();
   const totalWidth = markerX[2] - markerX[0];
   const progressWidth = interpolate(frame, [8, duration - 14], [0, totalWidth], clamp);
 
-  const activeYear = frame < 60 ? '2022' : '2023';
-  const activeYearOpacity = frame < 57 || frame >= 63 ? 1 : interpolate(frame, [57, 60, 63], [1, 0, 1], clamp);
-  const year2024Arrival = interpolate(frame, [150, 188], [0.28, 0.94], clamp);
+  const activeYear =
+    frame < YEAR_2023_START ? '2022' : frame < YEAR_2024_START ? '2023' : '2024';
+
+  const transitionDistance = Math.min(
+    Math.abs(frame - YEAR_2023_START),
+    Math.abs(frame - YEAR_2024_START),
+  );
+  const activeYearOpacity = interpolate(transitionDistance, [0, 3], [0.2, 1], clamp);
+  const year2024Arrival = interpolate(frame, [145, YEAR_2024_START + 9], [0.28, 0.96], clamp);
 
   const nodeOpacity = (year: '2022' | '2023' | '2024') => {
-    if (year === '2022') return frame < 60 ? 0.96 : 0.45;
-    if (year === '2023') return frame >= 60 ? 0.96 : 0.45;
+    if (year === '2022') return frame < YEAR_2023_START ? 0.96 : 0.42;
+    if (year === '2023') {
+      if (frame < YEAR_2023_START) return 0.42;
+      return frame < YEAR_2024_START ? 0.96 : 0.46;
+    }
     return year2024Arrival;
   };
 
