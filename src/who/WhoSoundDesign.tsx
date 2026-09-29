@@ -1,7 +1,7 @@
 import React from 'react';
 import {Audio} from '@remotion/media';
 import {Sequence, staticFile} from 'remotion';
-import {WHO_SCENES, WHO_SFX} from './whoConfig';
+import {WHO_SCENES, WHO_SFX, WHO_TRANSITION_FRAMES} from './whoConfig';
 
 export const WhoSoundDesign: React.FC = () => (
   <>
