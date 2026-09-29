@@ -1,0 +1,137 @@
+name: Hook Media Audit
+
+on:
+  push:
+    paths:
+      - ".github/workflows/hook-media-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS media
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Install media tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+
+      - name: Audit hook media
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .media-audit
+          mkdir -p .media-audit/contact-sheets .media-audit/frames
+
+          python3 - <<'PY'
+          import json, os, subprocess, hashlib, math
+          from pathlib import Path
+
+          root = Path("2-first 15 seconds")
+          files = sorted([p for p in root.iterdir() if p.is_file() and p.suffix.lower() in {".mp4",".mov",".m4v",".avi",".mkv"}])
+          summaries = []
+
+          def run(cmd):
+              return subprocess.check_output(cmd, text=True)
+
+          def fraction_to_float(value):
+              if not value or value == "0/0":
+                  return 0.0
+              if "/" in value:
+                  a,b = value.split("/",1)
+                  return float(a)/float(b) if float(b) else 0.0
+              return float(value)
+
+          for p in files:
+              probe = json.loads(run([
+                  "ffprobe","-v","error","-show_streams","-show_format","-of","json",str(p)
+              ]))
+              v = next((s for s in probe.get("streams",[]) if s.get("codec_type")=="video"), {})
+              a = next((s for s in probe.get("streams",[]) if s.get("codec_type")=="audio"), None)
+              width, height = int(v.get("width",0) or 0), int(v.get("height",0) or 0)
+              duration = float(probe.get("format",{}).get("duration") or v.get("duration") or 0)
+              avg_fps = fraction_to_float(v.get("avg_frame_rate"))
+              real_fps = fraction_to_float(v.get("r_frame_rate"))
+              rotation = 0
+              for sd in v.get("side_data_list",[]) or []:
+                  if "rotation" in sd:
+                      rotation = int(sd["rotation"])
+              if not rotation:
+                  rotation = int((v.get("tags") or {}).get("rotate",0) or 0)
+              display_w, display_h = (height,width) if abs(rotation)%180==90 else (width,height)
+              orientation = "vertical" if display_h > display_w else "landscape" if display_w > display_h else "square"
+              size = p.stat().st_size
+              sha = hashlib.sha256(p.read_bytes()).hexdigest()
+              min_dim = min(display_w, display_h)
+              quality = "preferred" if display_w >= 1920 and display_h >= 1080 else "usable" if min_dim >= 720 else "emergency"
+              summaries.append({
+                  "filename": p.name,
+                  "path": str(p).replace("\\","/"),
+                  "size_bytes": size,
+                  "size_mb": round(size/1024/1024,2),
+                  "sha256": sha,
+                  "duration_seconds": round(duration,3),
+                  "width": width,
+                  "height": height,
+                  "display_width": display_w,
+                  "display_height": display_h,
+                  "rotation_degrees": rotation,
+                  "orientation": orientation,
+                  "codec": v.get("codec_name",""),
+                  "profile": v.get("profile",""),
+                  "pixel_format": v.get("pix_fmt",""),
+                  "avg_fps": round(avg_fps,4),
+                  "nominal_fps": round(real_fps,4),
+                  "audio": bool(a),
+                  "audio_codec": a.get("codec_name","") if a else None,
+                  "bit_rate": int(probe.get("format",{}).get("bit_rate") or 0),
+                  "quality": quality,
+              })
+
+              frame_dir = Path(".media-audit/frames") / p.stem
+              frame_dir.mkdir(parents=True, exist_ok=True)
+              if duration <= 0:
+                  continue
+              # Beginning + deciles + end. This includes ~25/50/75% closely and gives
+              # enough visual coverage to identify active moments without altering media.
+              fracs = [0.01,0.10,0.20,0.25,0.35,0.50,0.65,0.75,0.85,0.95,0.99]
+              timestamps = []
+              for idx, frac in enumerate(fracs):
+                  t = min(max(0.0, duration*frac), max(0.0,duration-0.04))
+                  timestamps.append(round(t,3))
+                  out = frame_dir / f"{idx:02d}_{t:07.3f}s.jpg"
+                  subprocess.run([
+                      "ffmpeg","-hide_banner","-loglevel","error","-ss",f"{t:.3f}","-i",str(p),
+                      "-frames:v","1","-vf","scale=640:-2:flags=lanczos","-q:v","3","-y",str(out)
+                  ], check=True)
+              (frame_dir/"timestamps.json").write_text(json.dumps(timestamps,indent=2))
+
+              sheet = Path(".media-audit/contact-sheets") / f"{p.stem}.jpg"
+              imgs = sorted(str(x) for x in frame_dir.glob("*.jpg"))
+              subprocess.run([
+                  "montage",*imgs,"-label","%t","-tile","4x","-geometry","640x360+8+28",
+                  "-background","#0b1020","-fill","white","-pointsize","16",str(sheet)
+              ], check=True)
+
+          Path(".media-audit/metadata.json").write_text(json.dumps(summaries, indent=2))
+          with Path(".media-audit/metadata.tsv").open("w",encoding="utf-8") as f:
+              f.write("filename\tresolution\tfps\tduration_s\tcodec\torientation\tsize_mb\taudio\tquality\tsha256\n")
+              for s in summaries:
+                  f.write(f"{s['filename']}\t{s['display_width']}x{s['display_height']}\t{s['avg_fps']}\t{s['duration_seconds']}\t{s['codec']}\t{s['orientation']}\t{s['size_mb']}\t{s['audio']}\t{s['quality']}\t{s['sha256']}\n")
+          PY
+
+      - name: Commit audit outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .media-audit
+          git commit -m "Add hook media audit outputs [skip ci]" || exit 0
+          git push
