@@ -1,0 +1,84 @@
+name: The Challenge Stage 2 QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/the-challenge-stage2-qa.yml'
+      - 'src/challenge/**'
+      - 'src/FullFilm.tsx'
+      - 'src/Root.tsx'
+      - 'scripts/prepare-challenge-assets.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Pull LFS media
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs pull
+          git lfs checkout
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare all media
+        run: npm run prepare:media
+
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Render Challenge with full audio
+        run: npx remotion render src/index.ts TheChallenge out/qa/the-challenge-full.mp4 --codec=h264 --crf=20 --concurrency=2
+
+      - name: Render Challenge picture only
+        run: npx remotion render src/index.ts TheChallenge-PictureOnly out/qa/the-challenge-picture-only.mp4 --codec=h264 --crf=22 --concurrency=2
+
+      - name: Render Challenge music only
+        run: npx remotion render src/index.ts TheChallenge-MusicOnly out/qa/the-challenge-music-only.mp4 --codec=h264 --crf=22 --concurrency=2
+
+      - name: Render QA stills
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/qa/stills
+          for frame in 0 12 80 93 94 110 190 206 207 230 300 330 331 350 369 403 440 476 477 500 530 539; do
+            npx remotion still src/index.ts TheChallenge "out/qa/stills/challenge-${frame}.png" --frame="${frame}"
+          done
+          for frame in 1079 1080 1619; do
+            npx remotion still src/index.ts FullFilm "out/qa/stills/full-${frame}.png" --frame="${frame}"
+          done
+
+      - name: Create small preview
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -hide_banner -loglevel error -i out/qa/the-challenge-full.mp4 -vf "scale=640:-2" -c:v libx264 -crf 24 -c:a aac -b:a 128k out/qa/the-challenge-small-preview.mp4
+
+      - name: Upload Challenge QA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-challenge-stage2-qa
+          path: out/qa
+          retention-days: 3
+          if-no-files-found: error
